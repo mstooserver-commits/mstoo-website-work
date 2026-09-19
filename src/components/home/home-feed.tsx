@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { catalogApi } from "@/lib/api";
-import { mediaUrl } from "@/lib/media";
+import { mediaFallbacks } from "@/lib/media";
 import { useLocationStore } from "@/lib/stores/location";
 import { useConfigStore } from "@/lib/stores/config";
+import { BannerCarousel } from "@/components/catalog/banner-carousel";
+import { CategoryTile } from "@/components/catalog/category-tile";
 import { ServiceGrid } from "@/components/service/service-card";
 import { ServiceCardSkeleton } from "@/components/ui/skeleton";
 import { EmptyState, ErrorState } from "@/components/ui/states";
@@ -93,48 +95,21 @@ export function HomeFeed() {
       {banners.isError ? <ErrorState message="Could not load banners" onRetry={() => banners.refetch()} /> : null}
 
       {bannerItems.length > 0 ? (
-        <section className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
-          {bannerItems.map((banner) => {
-            const href =
-              banner.resource_type === "service" && banner.resource_id
-                ? `/service/${banner.resource_id}`
-                : banner.redirect_link || "/search";
-            return (
-              <Link key={banner.id} href={href} className="card relative min-w-[85%] snap-start overflow-hidden sm:min-w-[70%]">
-                <SafeImage
-                  src={banner.banner_image_full_url || mediaUrl(banner.banner_image, "banner", imageBase)}
-                  alt={banner.banner_title || "MSTOO offer"}
-                  className="h-44 w-full sm:h-56"
-                />
-                {banner.banner_title ? (
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 p-4 text-white">
-                    <p className="font-semibold">{banner.banner_title}</p>
-                  </div>
-                ) : null}
-              </Link>
-            );
-          })}
-        </section>
+        <BannerCarousel banners={bannerItems} />
       ) : banners.isLoading ? (
         <div className="h-44 animate-pulse rounded-lg bg-line" />
       ) : null}
 
       <section>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-bold">Categories</h2>
+          <h2 className="text-lg font-bold">Popular Categories</h2>
+          <Link href="/categories" className="text-sm font-medium text-brand">
+            View all
+          </Link>
         </div>
         <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 lg:grid-cols-8">
-          {categoryItems.map((cat) => (
-            <Link key={cat.id} href={`/category/${cat.id}`} className="flex flex-col items-center gap-2 text-center">
-              <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-brand-soft">
-                <SafeImage
-                  src={cat.image_full_url || mediaUrl(cat.image, "category", imageBase)}
-                  alt={cat.name}
-                  className="h-10 w-10 object-contain"
-                />
-              </span>
-              <span className="line-clamp-2 text-[11px] font-medium">{cat.name}</span>
-            </Link>
+          {categoryItems.slice(0, 8).map((cat) => (
+            <CategoryTile key={cat.id} category={cat} href={`/category/${cat.id}`} />
           ))}
         </div>
       </section>
@@ -146,7 +121,7 @@ export function HomeFeed() {
             {campaignItems.map((c) => (
               <Link key={c.id} href={`/search?campaign=${c.id}`} className="card min-w-[220px] overflow-hidden">
                 <SafeImage
-                  src={mediaUrl(c.thumbnail || c.cover_image || c.image, "campaign", imageBase)}
+                  src={mediaFallbacks(c.thumbnail || c.cover_image || c.image, "campaign", imageBase)}
                   alt={c.title || "Campaign"}
                   className="h-28 w-full"
                 />

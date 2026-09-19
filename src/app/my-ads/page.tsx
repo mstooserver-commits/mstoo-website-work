@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { providerApi } from "@/lib/api";
-import { serviceImage } from "@/lib/media";
+import { serviceImageSources } from "@/lib/media";
 import { SafeImage } from "@/components/ui/safe-image";
 import { EmptyState } from "@/components/ui/states";
 import type { Service } from "@/types";
@@ -26,7 +26,7 @@ export default function MyAdsPage() {
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {items.map((s) => (
           <Link key={s.id} href={`/service/${s.id}`} className="card flex gap-3 p-3">
-            <SafeImage src={serviceImage(s)} alt={s.name} className="h-20 w-20 rounded-md" />
+            <SafeImage src={serviceImageSources(s)} alt={s.name} className="h-20 w-20 rounded-md" />
             <div>
               <p className="font-semibold">{s.name}</p>
               <p className="text-sm text-muted">{s.availability}</p>

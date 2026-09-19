@@ -1,17 +1,25 @@
 import { ENDPOINTS } from "@/lib/constants";
 import { serverFetch } from "@/lib/api/server";
+import { LEGAL_HTML, type LegalSlug } from "@/content/legal";
 import { pageMeta } from "@/lib/seo";
 import { isFlagOn } from "@/lib/utils";
 import type { CmsPage, CmsPages } from "@/types";
 import type { Metadata } from "next";
 
-const MAP: Record<string, { key: keyof CmsPages; title: string; path: string }> = {
-  about: { key: "about_us", title: "About us", path: "/about" },
-  terms: { key: "terms_and_conditions", title: "Terms and conditions", path: "/terms" },
-  privacy: { key: "privacy_policy", title: "Privacy policy", path: "/privacy" },
-  refund: { key: "refund_policy", title: "Refund policy", path: "/refund" },
-  cancellation: { key: "cancellation_policy", title: "Cancellation policy", path: "/cancellation" },
+const MAP: Record<string, { key: keyof CmsPages; title: string; path: string; legal: LegalSlug }> = {
+  about: { key: "about_us", title: "About us", path: "/about", legal: "about" },
+  terms: { key: "terms_and_conditions", title: "Terms and conditions", path: "/terms", legal: "terms" },
+  privacy: { key: "privacy_policy", title: "Privacy policy", path: "/privacy", legal: "privacy" },
+  refund: { key: "refund_policy", title: "Refund policy", path: "/refund", legal: "refund" },
+  cancellation: {
+    key: "cancellation_policy",
+    title: "Cancellation policy",
+    path: "/cancellation",
+    legal: "cancellation",
+  },
 };
+
+const GENERIC_PRIVACY_STUB = /inform visitors regarding our policies with the collection/i;
 
 async function loadPages() {
   try {
@@ -19,6 +27,28 @@ async function loadPages() {
   } catch {
     return null;
   }
+}
+
+function stripTags(html: string) {
+  return html.replace(/<[^>]+>/g, " ").replace(/&nbsp;/gi, " ").replace(/\s+/g, " ").trim();
+}
+
+function prepareHtml(html: string) {
+  return html
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
+    .replace(/\son\w+="[^"]*"/gi, "")
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+}
+
+function pageHtml(page: CmsPage | undefined, slug: LegalSlug) {
+  const raw = String(page?.live_values || page?.content || "").trim();
+  const text = stripTags(raw);
+  const fallback = LEGAL_HTML[slug];
+  if (text.length < 80) return fallback;
+  if (GENERIC_PRIVACY_STUB.test(text) && slug !== "privacy") return fallback;
+  if (GENERIC_PRIVACY_STUB.test(text) && slug === "privacy") return fallback;
+  if (slug === "refund" && /featured ads package/i.test(text) && !/refund/i.test(text)) return fallback;
+  return prepareHtml(raw);
 }
 
 export function cmsMetadata(slug: keyof typeof MAP): Promise<Metadata> {
@@ -46,9 +76,9 @@ export async function CmsView({ slug }: { slug: keyof typeof MAP }) {
     );
   }
   return (
-    <article className="container-page prose max-w-3xl py-10">
-      <h1>{page?.title || meta.title}</h1>
-      <div dangerouslySetInnerHTML={{ __html: page?.content || "<p>Content will appear here once published in admin.</p>" }} />
+    <article className="container-page max-w-3xl py-10">
+      <h1 className="text-3xl font-bold">{page?.title || meta.title}</h1>
+      <div className="cms-content mt-6" dangerouslySetInnerHTML={{ __html: pageHtml(page, meta.legal) }} />
     </article>
   );
 }

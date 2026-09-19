@@ -1,5 +1,5 @@
 import { ENDPOINTS } from "@/lib/constants";
-import { apiDelete, apiGet, apiPost, apiPut, apiUpload } from "@/lib/api/client";
+import { api, apiDelete, apiGet, apiPost, apiPut, apiUpload } from "@/lib/api/client";
 import type {
   Address,
   AppConfig,
@@ -57,9 +57,9 @@ export const authApi = {
 
 export const catalogApi = {
   banners: () => apiGet<Paginated<Banner>>(ENDPOINTS.banner, { limit: 10, offset: 1 }),
-  categories: () => apiGet<Paginated<Category>>(ENDPOINTS.category, { limit: 20, offset: 1 }),
+  categories: () => apiGet<Paginated<Category>>(ENDPOINTS.category, { limit: 100, offset: 1 }),
   children: (id: string) =>
-    apiGet<Paginated<Category>>(ENDPOINTS.categoryChildren, { limit: 20, offset: 1, id }),
+    apiGet<Paginated<Category>>(ENDPOINTS.categoryChildren, { limit: 100, offset: 1, id }),
   campaigns: () => apiGet<Paginated<Campaign>>(ENDPOINTS.campaign, { limit: 10, offset: 1 }),
   featuredCategories: () =>
     apiGet<unknown>(ENDPOINTS.featuredCategories, { limit: 100, offset: 1 }),
@@ -145,6 +145,14 @@ export const providerApi = {
   details: (id: string) => apiGet<Provider>(ENDPOINTS.providerDetails, { id }),
   myAds: () => apiPost(ENDPOINTS.myServices, {}),
   addService: (form: FormData) => apiUpload(ENDPOINTS.addService, form),
+  postCategories: () => apiGet<Array<{ id?: string; name?: string }>>(ENDPOINTS.getAllCat),
+  postSubcategories: (id: string) =>
+    apiGet<Array<{ id?: string; name?: string }>>(`${ENDPOINTS.getAllSubCat}${id}`),
+  postFields: async (id: string) => {
+    const { data } = await api.get(`${ENDPOINTS.getFieldsById}${id}`);
+    const body = data as Record<string, unknown>;
+    return (body?.data ?? body?.content ?? body) as Record<string, unknown>;
+  },
   accept: (body: Record<string, unknown>) => apiPost(ENDPOINTS.providerAccept, body),
   reject: (body: Record<string, unknown>) => apiPost(ENDPOINTS.providerReject, body),
   bank: () => apiGet(ENDPOINTS.providerBank),

@@ -101,7 +101,7 @@ export async function apiDelete<T>(url: string, config?: AxiosRequestConfig) {
   return data as T;
 }
 
-export async function apiUpload<T>(url: string, form: FormData) {
-  const { data } = await api.post(url, form);
+export async function apiUpload<T>(url: string, form: FormData, config?: AxiosRequestConfig) {
+  const { data } = await api.post(url, form, { timeout: 120000, ...config });
   return data as T;
 }

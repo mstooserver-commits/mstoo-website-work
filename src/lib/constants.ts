@@ -27,8 +27,8 @@ export const DEFAULT_LOCATION = {
 };
 
 export const IMAGE_BASE_FALLBACKS = [
-  "https://preprod.mstoo.co.in/storage/app/public",
   "https://api.mstoo.co.in/storage/app/public",
+  "https://preprod.mstoo.co.in/storage/app/public",
 ];
 
 export const ENDPOINTS = {
@@ -134,6 +134,10 @@ export const ENDPOINTS = {
   customPostBidDetails: "/api/v1/customer/post/bid/details",
 
   addService: "/api/v1/provider/add_service",
+  getAllCat: "/api/v1/getallcat",
+  getAllSubCat: "/api/v1/getallsubcatbyid/",
+  getFieldsById: "/api/v1/getfieldsbyid/",
+  getPaymentGateway: "/api/v1/getpaymentgateway",
   myServices: "/api/v1/provider/myservices",
   providerBooking: "/api/v1/provider/booking",
   providerAccept: "/api/v1/provider/booking/request-accept",

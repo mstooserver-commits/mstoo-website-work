@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { MapPin, MessageCircle, Phone, Star } from "lucide-react";
 import { catalogApi, chatApi } from "@/lib/api";
 import { servicePriceLabel } from "@/lib/currency";
-import { serviceImage } from "@/lib/media";
+import { serviceImageSources } from "@/lib/media";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useCartStore } from "@/lib/stores/cart";
 import { useConfigStore } from "@/lib/stores/config";
@@ -84,7 +84,7 @@ export function ServiceDetailView({ service }: { service: Service }) {
     <div className="container-page py-8">
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="overflow-hidden rounded-lg bg-white shadow-card">
-          <SafeImage src={serviceImage(service)} alt={service.name} className="aspect-[4/3] w-full" />
+          <SafeImage src={serviceImageSources(service)} alt={service.name} className="aspect-[4/3] w-full" />
         </div>
         <div>
           <p className="text-sm text-brand">{service.category?.name}</p>

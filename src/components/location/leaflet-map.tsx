@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, Marker, TileLayer, useMapEvents } from "react-leaflet";
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import type { LatLngExpression } from "leaflet";
 import { useEffect } from "react";
 import "leaflet/dist/leaflet.css";
@@ -23,6 +23,14 @@ function Clicker({ onChange }: { onChange: (lat: number, lng: number) => void })
   return null;
 }
 
+function Recenter({ center }: { center: [number, number] }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center);
+  }, [center, map]);
+  return null;
+}
+
 export default function LeafletMap({
   center,
   onChange,
@@ -30,14 +38,12 @@ export default function LeafletMap({
   center: LatLngExpression;
   onChange: (lat: number, lng: number) => void;
 }) {
-  useEffect(() => {
-    /* leaflet CSS imported */
-  }, []);
   const pos = center as [number, number];
   return (
     <MapContainer center={center} zoom={14} className="h-full w-full">
       <TileLayer attribution="&copy; OpenStreetMap" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <Marker position={pos} icon={icon} />
+      <Recenter center={pos} />
       <Clicker onChange={onChange} />
     </MapContainer>
   );

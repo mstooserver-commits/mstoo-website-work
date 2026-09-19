@@ -106,8 +106,10 @@ export interface AppConfig {
 export interface CmsPage {
   id?: string;
   slug?: string;
+  key_name?: string;
   title?: string;
   content?: string;
+  live_values?: string;
   is_active?: number;
 }
 
@@ -177,6 +179,7 @@ export interface Banner {
   banner_image?: string;
   banner_image_full_url?: string;
   service?: Service;
+  category?: Category;
 }
 
 export interface Campaign {

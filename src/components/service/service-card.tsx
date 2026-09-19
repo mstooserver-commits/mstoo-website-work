@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { servicePriceLabel } from "@/lib/currency";
-import { serviceImage } from "@/lib/media";
+import { serviceImageSources } from "@/lib/media";
 import type { Service } from "@/types";
 import { SafeImage } from "@/components/ui/safe-image";
 import { MapPin, Star } from "lucide-react";
 
 export function ServiceCard({ service }: { service: Service }) {
   const href = `/service/${service.id}`;
-  const img = serviceImage(service);
+  const img = serviceImageSources(service);
   const featured = service.is_featured === "yes" || service.is_featured === 1;
   return (
     <Link href={href} className="card group overflow-hidden transition hover:-translate-y-0.5 hover:shadow-lg">
