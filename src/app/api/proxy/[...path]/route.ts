@@ -82,7 +82,9 @@ async function forward(req: NextRequest, path: string[]) {
     },
   });
 
-  const isAuthPath = path.join("/").includes("customer/auth/");
+  const joined = path.join("/");
+  const isAuthPath =
+    joined.includes("customer/auth/") || joined.includes("user/verification/verify-otp");
   const token = extractToken(json);
   if (isAuthPath && token && upstream.ok) {
     response.cookies.set(COOKIES.token, token, {
@@ -94,7 +96,13 @@ async function forward(req: NextRequest, path: string[]) {
     });
   }
 
-  if (upstream.status === 401) {
+  const unverified =
+    json &&
+    typeof json === "object" &&
+    ((json as { response_code?: string }).response_code === "unverified_phone_401" ||
+      (json as { response_code?: string }).response_code === "unverified_email_401");
+
+  if (upstream.status === 401 && !unverified) {
     response.cookies.set(COOKIES.token, "", { httpOnly: true, path: "/", maxAge: 0 });
   }
 

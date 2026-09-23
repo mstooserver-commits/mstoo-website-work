@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { authApi } from "@/lib/api";
 import { isValidIndiaPhone, normalizeIndiaPhone } from "@/lib/phone";
 import { useAuthStore } from "@/lib/stores/auth";
+import { ApiError } from "@/lib/errors";
 import { useCartStore } from "@/lib/stores/cart";
 
 const schema = z.object({
@@ -49,6 +50,22 @@ export default function LoginClient() {
       toast.success("Welcome back");
       router.push(params.get("redirect") || "/");
     } catch (err) {
+      const code = err instanceof ApiError ? err.code : "";
+      const unverified = code === "unverified_phone_401" || code === "unverified_email_401";
+      if (unverified) {
+        const type = code === "unverified_email_401" ? "email" : "phone";
+        sessionStorage.setItem("mstoo.otp.identity", identity);
+        sessionStorage.setItem("mstoo.otp.type", type);
+        sessionStorage.setItem("mstoo.otp.purpose", "verify");
+        try {
+          await authApi.sendOtp({ identity, identity_type: type, signature_id: "" });
+        } catch {
+          /* OTP page can resend */
+        }
+        toast.message("Verify your phone to finish creating this account");
+        router.push("/verify-otp");
+        return;
+      }
       toast.error(err instanceof Error ? err.message : "Login failed");
     }
   };

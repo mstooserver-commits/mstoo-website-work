@@ -50,8 +50,10 @@ api.interceptors.response.use(
     const status = error.response?.status ?? 0;
     const payload = error.response?.data;
     const message = extractApiError(payload, error.message || "Request failed");
+    const code = (payload as { response_code?: string } | undefined)?.response_code;
+    const unverified = code === "unverified_phone_401" || code === "unverified_email_401";
 
-    if (status === 401 && typeof window !== "undefined") {
+    if (status === 401 && !unverified && typeof window !== "undefined") {
       const { useAuthStore } = await import("@/lib/stores/auth");
       useAuthStore.getState().clearSession();
       const path = window.location.pathname;
@@ -67,7 +69,7 @@ api.interceptors.response.use(
       new ApiError(
         message,
         status,
-        (payload as { response_code?: string } | undefined)?.response_code,
+        code,
         payload,
       ),
     );
