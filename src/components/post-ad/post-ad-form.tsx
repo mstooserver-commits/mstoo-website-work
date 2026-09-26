@@ -563,7 +563,11 @@ export function PostAdForm() {
       await publish();
       return;
     }
-    const key = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || config?.razorpay_key || config?.razorpayKey;
+    const key =
+      process.env.NEXT_PUBLIC_RAZORPAY_KEY ||
+      process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
+      config?.razorpay_key ||
+      config?.razorpayKey;
     if (!key || !window.Razorpay) {
       toast.error("Razorpay is not configured for featured ads");
       return;

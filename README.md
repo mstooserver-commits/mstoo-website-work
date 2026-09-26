@@ -29,12 +29,13 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Variable | Purpose |
 | --- | --- |
-| `NEXT_PUBLIC_API_BASE_URL` | Laravel host (`https://preprod.mstoo.co.in`) |
+| `NEXT_PUBLIC_API_URL` | Laravel host (`https://your-backend-url`) |
+| `NEXT_PUBLIC_API_BASE_URL` | Backward-compatible alias for the Laravel host |
 | `NEXT_PUBLIC_APP_NAME` | `MSTOO` |
 | `NEXT_PUBLIC_CURRENCY` | `INR` |
 | `NEXT_PUBLIC_APP_URL` | Canonical site URL (sitemap/OG) |
-| `NEXT_PUBLIC_RAZORPAY_KEY_ID` | Razorpay key (optional if present in `/customer/config`) |
-| `RAZORPAY_KEY_SECRET` | Server-only order creation |
+| `NEXT_PUBLIC_RAZORPAY_KEY` | Public Razorpay key, usually `rzp_test_...` in test mode |
+| `RAZORPAY_KEY_SECRET` | Server-only key; never expose this to the browser |
 
 Auth JWT is stored in an **httpOnly** `mstoo_token` cookie via `/api/auth/session` and the proxy. Zone + lat/lng are stored in `localStorage` (`mstoo.location`) and readable cookies so listing APIs send the same `zoneId` header as the Flutter `ApiClient`.
 
@@ -66,10 +67,52 @@ npm run start
 npm run lint
 ```
 
+## Razorpay booking + wallet flow
+
+The app includes a reusable payment service at `src/lib/api/payment.ts` with the following functions:
+
+- `getConfig()` fetches `GET /api/v1/customer/config` and reads the Razorpay public key.
+- `openRazorpayCheckout({ amount, name, description, email, phone, onSuccess, onFailure })` loads the Razorpay checkout script and opens the modal.
+- `createBookingWithRazorpay(payload)` submits the booking request with `payment_method: "razor_pay"` and Razorpay metadata.
+- `addWalletFund(amount)` sends `POST /api/v1/customer/wallet/add-fund`, then redirects to the returned `payment_url`.
+
+Examples:
+
+- Booking demo: `src/app/payments/booking/page.tsx`
+- Wallet top-up demo: `src/app/payments/wallet/page.tsx`
+- Reusable hook: `src/hooks/use-razorpay-checkout.ts`
+- Reusable button: `src/components/payments/razorpay-checkout-button.tsx`
+
+Typical flow for a booking:
+
+```ts
+const payload = {
+  payment_method: "razor_pay",
+  zone_id: "zone_123",
+  service_schedule: "2026-09-27T12:00",
+  service_address_id: "address_456",
+  razorpay_payment_id: response.razorpay_payment_id,
+  razorpay_order_id: response.razorpay_order_id,
+  razorpay_signature: response.razorpay_signature,
+};
+
+await createBookingWithRazorpay(payload);
+```
+
+Typical flow for wallet funding:
+
+```ts
+const paymentUrl = await addWalletFund(5000, {
+  callback: "/wallet",
+  payment_platform: "web",
+});
+window.location.href = paymentUrl;
+```
+
 ## Security notes
 
 - Prefer the httpOnly cookie path (implemented). Do not copy JWTs into analytics.
-- Razorpay **secret must stay server-side** (`RAZORPAY_KEY_SECRET`). The Flutter app currently reads a secret from config — the website does not expose it to the browser.
+- Razorpay **secret must stay server-side** (`RAZORPAY_KEY_SECRET`). The website does not expose it to the browser.
 - `/api/proxy` forwards `Authorization` + `zoneId` to Laravel and never logs tokens.
 
 ## Test plan

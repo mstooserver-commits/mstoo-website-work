@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY ?? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
   const secret = process.env.RAZORPAY_KEY_SECRET;
   if (!keyId || !secret) {
     return NextResponse.json(
       {
         error:
-          "Razorpay keys are not configured on the server. Set NEXT_PUBLIC_RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.",
+          "Razorpay keys are not configured on the server. Set NEXT_PUBLIC_RAZORPAY_KEY and RAZORPAY_KEY_SECRET.",
       },
       { status: 400 },
     );

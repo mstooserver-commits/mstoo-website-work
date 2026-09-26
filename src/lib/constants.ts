@@ -1,8 +1,10 @@
 export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME ?? "MSTOO";
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://preprod.mstoo.co.in";
+  process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://preprod.mstoo.co.in";
 export const CURRENCY = process.env.NEXT_PUBLIC_CURRENCY ?? "INR";
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+export const RAZORPAY_PUBLIC_KEY =
+  process.env.NEXT_PUBLIC_RAZORPAY_KEY ?? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "";
 
 export const STORAGE_KEYS = {
   location: "mstoo.location",

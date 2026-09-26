@@ -13,12 +13,6 @@ import type { Address, Paginated } from "@/types";
 import { EmptyState } from "@/components/ui/states";
 import Link from "next/link";
 
-declare global {
-  interface Window {
-    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
-  }
-}
-
 function unwrapAddresses(payload: unknown): Address[] {
   if (Array.isArray(payload)) return payload as Address[];
   return ((payload as Paginated<Address>)?.data || []) as Address[];
@@ -96,7 +90,11 @@ export default function CheckoutPage() {
     setBusy(true);
     try {
       if (method === "razor_pay") {
-        const key = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || config?.razorpay_key || config?.razorpayKey;
+        const key =
+          process.env.NEXT_PUBLIC_RAZORPAY_KEY ||
+          process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
+          config?.razorpay_key ||
+          config?.razorpayKey;
         const amount = Math.max(100, Math.round(subtotal * 100));
         let orderId: string | undefined;
         try {

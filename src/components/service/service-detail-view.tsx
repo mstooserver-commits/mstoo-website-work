@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { MapPin, MessageCircle, Phone, Star } from "lucide-react";
-import { catalogApi, chatApi } from "@/lib/api";
+import { MapPin, Phone, Star } from "lucide-react";
+import { catalogApi } from "@/lib/api";
 import { servicePriceLabel } from "@/lib/currency";
 import { serviceImageSources } from "@/lib/media";
 import { useAuthStore } from "@/lib/stores/auth";
@@ -56,27 +56,6 @@ export function ServiceDetailView({ service }: { service: Service }) {
     }
   };
 
-  const chat = async () => {
-    if (!isLoggedIn) {
-      router.push("/login?redirect=/chat");
-      return;
-    }
-    try {
-      const res = await chatApi.create({
-        provider_id: service.added_by,
-        user_type: "customer",
-        reference_id: service.id,
-        reference_type: "booking",
-      });
-      const id =
-        (res as { content?: { id?: string } }).content?.id ||
-        (res as { id?: string }).id;
-      router.push(id ? `/chat/${id}` : "/chat");
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not start chat");
-    }
-  };
-
   const relatedItems = (related.data?.data || []).filter((s) => s.id !== service.id).slice(0, 8);
   const reviewItems = (reviews.data?.data as { id?: string; review_comment?: string; review_rating?: number; customer?: { first_name?: string } }[] | undefined) || [];
 
@@ -107,9 +86,6 @@ export function ServiceDetailView({ service }: { service: Service }) {
           <div className="mt-6 flex flex-wrap gap-3">
             <button className="btn-primary" onClick={book}>
               Book now
-            </button>
-            <button className="btn-secondary gap-2" onClick={chat}>
-              <MessageCircle className="h-4 w-4" /> Chat
             </button>
             {service.contact_info && isFlagOn(config?.phone_number_visibility_for_chatting) ? (
               <a className="btn-secondary gap-2" href={`tel:${service.contact_info}`}>
