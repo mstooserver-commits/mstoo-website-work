@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { MapPin, Phone, Star } from "lucide-react";
+import { MapPin, Phone, ShoppingCart, Star } from "lucide-react";
 import { catalogApi } from "@/lib/api";
 import { servicePriceLabel } from "@/lib/currency";
 import { serviceImageSources } from "@/lib/media";
@@ -21,6 +22,7 @@ export function ServiceDetailView({ service }: { service: Service }) {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const addCart = useCartStore((s) => s.add);
   const config = useConfigStore((s) => s.config);
+  const [adding, setAdding] = useState<"cart" | "booking" | null>(null);
   const variant =
     service.variations_app_format?.zone_wise_variations?.[0]?.variant_key ||
     service.variations?.[0]?.variant_key ||
@@ -36,11 +38,13 @@ export function ServiceDetailView({ service }: { service: Service }) {
     queryFn: () => catalogApi.bySubcategory(service.sub_category_id!, 1),
   });
 
-  const book = async () => {
+  const addToCart = async (checkout = false) => {
     if (!isLoggedIn) {
-      router.push(`/login?redirect=/service/${service.id}`);
+      const redirect = checkout ? `/service/${service.id}?book=1` : `/service/${service.id}`;
+      router.push(`/login?redirect=${encodeURIComponent(redirect)}`);
       return;
     }
+    setAdding(checkout ? "booking" : "cart");
     try {
       await addCart({
         service_id: service.id,
@@ -50,20 +54,34 @@ export function ServiceDetailView({ service }: { service: Service }) {
         quantity: "1",
       });
       toast.success("Added to cart");
-      router.push("/checkout");
+      if (checkout) router.push("/checkout");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not add to cart");
+    } finally {
+      setAdding(null);
     }
   };
 
   const relatedItems = (related.data?.data || []).filter((s) => s.id !== service.id).slice(0, 8);
-  const reviewItems = (reviews.data?.data as { id?: string; review_comment?: string; review_rating?: number; customer?: { first_name?: string } }[] | undefined) || [];
+  const reviewItems =
+    (reviews.data?.data as
+      | {
+          id?: string;
+          review_comment?: string;
+          review_rating?: number;
+          customer?: { first_name?: string };
+        }[]
+      | undefined) || [];
 
   return (
     <div className="container-page py-8">
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="overflow-hidden rounded-lg bg-white shadow-card">
-          <SafeImage src={serviceImageSources(service)} alt={service.name} className="aspect-[4/3] w-full" />
+          <SafeImage
+            src={serviceImageSources(service)}
+            alt={service.name}
+            className="aspect-[4/3] w-full"
+          />
         </div>
         <div>
           <p className="text-sm text-brand">{service.category?.name}</p>
@@ -84,8 +102,20 @@ export function ServiceDetailView({ service }: { service: Service }) {
             </p>
           ) : null}
           <div className="mt-6 flex flex-wrap gap-3">
-            <button className="btn-primary" onClick={book}>
-              Book now
+            <button
+              className="btn-primary"
+              disabled={adding !== null}
+              onClick={() => void addToCart(true)}
+            >
+              {adding === "booking" ? "Adding…" : "Book now"}
+            </button>
+            <button
+              className="btn-secondary gap-2"
+              disabled={adding !== null}
+              onClick={() => void addToCart()}
+            >
+              <ShoppingCart className="h-4 w-4" />
+              {adding === "cart" ? "Adding…" : "Add to cart"}
             </button>
             {service.contact_info && isFlagOn(config?.phone_number_visibility_for_chatting) ? (
               <a className="btn-secondary gap-2" href={`tel:${service.contact_info}`}>

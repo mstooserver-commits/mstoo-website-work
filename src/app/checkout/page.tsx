@@ -8,6 +8,7 @@ import { formatInr } from "@/lib/currency";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useCartStore } from "@/lib/stores/cart";
 import { useConfigStore } from "@/lib/stores/config";
+import { useLocationStore } from "@/lib/stores/location";
 import { isFlagOn } from "@/lib/utils";
 import type { Address, Paginated } from "@/types";
 import { EmptyState } from "@/components/ui/states";
@@ -20,9 +21,12 @@ function unwrapAddresses(payload: unknown): Address[] {
 
 export default function CheckoutPage() {
   const items = useCartStore((s) => s.items);
+  const cartLoading = useCartStore((s) => s.loading);
+  const loadCart = useCartStore((s) => s.load);
   const empty = useCartStore((s) => s.empty);
   const user = useAuthStore((s) => s.user);
   const config = useConfigStore((s) => s.config);
+  const location = useLocationStore((s) => s.location);
   const [addressId, setAddressId] = useState("");
   const [schedule, setSchedule] = useState("");
   const [note, setNote] = useState("");
@@ -51,13 +55,31 @@ export default function CheckoutPage() {
   }, []);
 
   const subtotal = useMemo(
-    () => items.reduce((sum, item) => sum + Number(item.total_cost ?? item.service_cost ?? 0) * Number(item.quantity ?? 1), 0),
+    () =>
+      items.reduce(
+        (sum, item) =>
+          sum + Number(item.total_cost ?? item.service_cost ?? 0) * Number(item.quantity ?? 1),
+        0,
+      ),
     [items],
   );
 
   const digital = isFlagOn(config?.digital_payment);
   const wallet = isFlagOn(config?.wallet_payment);
   const cas = isFlagOn(config?.cash_after_service);
+
+  useEffect(() => {
+    if (!items.length) void loadCart();
+  }, [items.length, loadCart]);
+
+  useEffect(() => {
+    const available = [
+      digital && "razor_pay",
+      wallet && "wallet_payment",
+      cas && "cash_after_service",
+    ].filter(Boolean) as string[];
+    if (available.length && !available.includes(method)) setMethod(available[0]);
+  }, [cas, digital, method, wallet]);
 
   const place = async (extra: Record<string, unknown> = {}) => {
     if (!addressId) {
@@ -71,16 +93,14 @@ export default function CheckoutPage() {
     const body = {
       payment_method: method,
       service_address_id: addressId,
-      schedule,
+      service_schedule: schedule,
+      zone_id:
+        list.find((address) => String(address.id) === addressId)?.zone_id || location?.zoneId,
       user_id: user?.id,
       note,
       ...extra,
     };
-    if (method === "razor_pay") {
-      await bookingApi.razorpay(body);
-    } else {
-      await bookingApi.place(body);
-    }
+    await bookingApi.place(body);
     await empty();
     toast.success("Booking placed");
     window.location.href = "/bookings";
@@ -121,12 +141,16 @@ export default function CheckoutPage() {
           currency: "INR",
           name: "MSTOO",
           order_id: orderId,
-          handler: async (response: { razorpay_payment_id?: string; razorpay_order_id?: string; razorpay_signature?: string }) => {
+          handler: async (response: {
+            razorpay_payment_id?: string;
+            razorpay_order_id?: string;
+            razorpay_signature?: string;
+          }) => {
             try {
               await place({
-                payment_id: response.razorpay_payment_id,
-                order_id: response.razorpay_order_id,
-                signature: response.razorpay_signature,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
               });
             } catch (err) {
               toast.error(err instanceof Error ? err.message : "Booking failed after payment");
@@ -145,10 +169,21 @@ export default function CheckoutPage() {
     }
   };
 
+  if (cartLoading && items.length === 0) {
+    return <div className="container-page py-12 text-muted">Loading cart…</div>;
+  }
+
   if (items.length === 0) {
     return (
       <div className="container-page py-12">
-        <EmptyState title="Cart is empty" action={<Link href="/cart" className="btn-primary">Go to cart</Link>} />
+        <EmptyState
+          title="Cart is empty"
+          action={
+            <Link href="/cart" className="btn-primary">
+              Go to cart
+            </Link>
+          }
+        />
       </div>
     );
   }
@@ -159,8 +194,18 @@ export default function CheckoutPage() {
         <h1 className="text-2xl font-bold">Checkout</h1>
         <section className="card p-4">
           <h2 className="font-semibold">Schedule</h2>
-          <input type="datetime-local" className="input mt-3" value={schedule} onChange={(e) => setSchedule(e.target.value)} />
-          <textarea className="input mt-3" placeholder="Note for provider" value={note} onChange={(e) => setNote(e.target.value)} />
+          <input
+            type="datetime-local"
+            className="input mt-3"
+            value={schedule}
+            onChange={(e) => setSchedule(e.target.value)}
+          />
+          <textarea
+            className="input mt-3"
+            placeholder="Note for provider"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
         </section>
         <section className="card p-4">
           <div className="flex items-center justify-between">
@@ -172,7 +217,12 @@ export default function CheckoutPage() {
           <div className="mt-3 space-y-2">
             {list.map((a) => (
               <label key={String(a.id)} className="flex items-start gap-2 text-sm">
-                <input type="radio" name="address" checked={addressId === String(a.id)} onChange={() => setAddressId(String(a.id))} />
+                <input
+                  type="radio"
+                  name="address"
+                  checked={addressId === String(a.id)}
+                  onChange={() => setAddressId(String(a.id))}
+                />
                 <span>
                   {a.address}
                   <span className="block text-muted">{a.contact_person_name}</span>
@@ -187,21 +237,36 @@ export default function CheckoutPage() {
           <div className="mt-3 space-y-2 text-sm">
             {digital ? (
               <label className="flex items-center gap-2">
-                <input type="radio" checked={method === "razor_pay"} onChange={() => setMethod("razor_pay")} />
+                <input
+                  type="radio"
+                  checked={method === "razor_pay"}
+                  onChange={() => setMethod("razor_pay")}
+                />
                 Razorpay (UPI / cards / netbanking)
               </label>
             ) : null}
             {wallet ? (
               <label className="flex items-center gap-2">
-                <input type="radio" checked={method === "wallet_payment"} onChange={() => setMethod("wallet_payment")} />
+                <input
+                  type="radio"
+                  checked={method === "wallet_payment"}
+                  onChange={() => setMethod("wallet_payment")}
+                />
                 Wallet
               </label>
             ) : null}
             {cas ? (
               <label className="flex items-center gap-2">
-                <input type="radio" checked={method === "cash_after_service"} onChange={() => setMethod("cash_after_service")} />
+                <input
+                  type="radio"
+                  checked={method === "cash_after_service"}
+                  onChange={() => setMethod("cash_after_service")}
+                />
                 Cash after service
               </label>
+            ) : null}
+            {!digital && !wallet && !cas ? (
+              <p className="text-danger">No payment method is currently available.</p>
             ) : null}
           </div>
         </section>
@@ -211,7 +276,12 @@ export default function CheckoutPage() {
         <p className="mt-3 text-sm">{items.length} item(s)</p>
         <p className="mt-2 text-xl font-bold">{formatInr(subtotal)}</p>
         <div className="mt-4 flex gap-2">
-          <input className="input" placeholder="Coupon" value={coupon} onChange={(e) => setCoupon(e.target.value)} />
+          <input
+            className="input"
+            placeholder="Coupon"
+            value={coupon}
+            onChange={(e) => setCoupon(e.target.value)}
+          />
           <button
             className="btn-secondary"
             onClick={async () => {
@@ -226,7 +296,11 @@ export default function CheckoutPage() {
             Apply
           </button>
         </div>
-        <button className="btn-primary mt-4 w-full" disabled={busy} onClick={pay}>
+        <button
+          className="btn-primary mt-4 w-full"
+          disabled={busy || (!digital && !wallet && !cas)}
+          onClick={pay}
+        >
           {busy ? "Processing…" : "Place booking"}
         </button>
       </aside>
