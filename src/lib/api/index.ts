@@ -6,7 +6,6 @@ import type {
   Banner,
   Booking,
   Campaign,
-  CartItem,
   Category,
   ChatChannel,
   ChatMessage,
@@ -39,7 +38,8 @@ export const locationApi = {
 };
 
 export const authApi = {
-  login: (body: Record<string, string>) => apiPost<LaravelResponse<{ token?: string } & UserInfo>>(ENDPOINTS.login, body),
+  login: (body: Record<string, string>) =>
+    apiPost<LaravelResponse<{ token?: string } & UserInfo>>(ENDPOINTS.login, body),
   register: (body: Record<string, string>) => apiPost<LaravelResponse>(ENDPOINTS.register, body),
   info: () => apiGet<UserInfo>(ENDPOINTS.customerInfo),
   updateProfile: (body: FormData | Record<string, unknown>) =>
@@ -88,12 +88,11 @@ export const catalogApi = {
 };
 
 export const cartApi = {
-  list: () => apiGet<Paginated<CartItem> | CartItem[]>(ENDPOINTS.cartList, { limit: 100, offset: 1 }),
+  list: () => apiGet<unknown>(ENDPOINTS.cartList, { limit: 100, offset: 1 }),
   add: (body: Record<string, string>) => apiPost(ENDPOINTS.cartAdd, body),
   remove: (id: string) => apiDelete(`${ENDPOINTS.cartRemove}${id}`),
   empty: () => apiDelete(ENDPOINTS.cartEmpty),
-  updateQty: (id: string, quantity: number) =>
-    apiPut(`${ENDPOINTS.cartQty}${id}`, { quantity }),
+  updateQty: (id: string, quantity: number) => apiPut(`${ENDPOINTS.cartQty}${id}`, { quantity }),
   otherInfo: (body: Record<string, unknown>) => apiPost(ENDPOINTS.cartOtherInfo, body),
 };
 
@@ -126,7 +125,8 @@ export const addressApi = {
 };
 
 export const walletApi = {
-  transactions: (offset = 1) => apiGet<Paginated<WalletTx>>(ENDPOINTS.walletTx, { offset, limit: 10 }),
+  transactions: (offset = 1) =>
+    apiGet<Paginated<WalletTx>>(ENDPOINTS.walletTx, { offset, limit: 10 }),
   addFund: (body: Record<string, unknown>) => apiPost(ENDPOINTS.walletAddFund, body),
   loyalty: (offset = 1) => apiGet<Paginated<WalletTx>>(ENDPOINTS.loyaltyTx, { offset, limit: 10 }),
   transfer: (body: Record<string, unknown>) => apiPost(ENDPOINTS.loyaltyTransfer, body),

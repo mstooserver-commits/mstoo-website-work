@@ -46,12 +46,24 @@ export function ServiceDetailView({ service }: { service: Service }) {
     }
     setAdding(checkout ? "booking" : "cart");
     try {
-      await addCart({
+      const cartBody = {
         service_id: service.id,
         category_id: service.category_id || "",
         sub_category_id: service.sub_category_id || "",
         variant_key: variant,
         quantity: "1",
+      };
+      await addCart(cartBody, {
+        ...cartBody,
+        quantity: 1,
+        service_cost: Number(
+          service.variations_app_format?.zone_wise_variations?.[0]?.price ??
+            service.variations?.[0]?.price ??
+            service.price ??
+            service.min_price ??
+            0,
+        ),
+        service,
       });
       toast.success("Added to cart");
       if (checkout) router.push("/checkout");
