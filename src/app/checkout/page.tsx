@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { addressApi, bookingApi, couponApi } from "@/lib/api";
-import { formatInr } from "@/lib/currency";
+import { cartItemLineTotal, formatInr } from "@/lib/currency";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useCartStore } from "@/lib/stores/cart";
 import { useConfigStore } from "@/lib/stores/config";
@@ -55,12 +55,7 @@ export default function CheckoutPage() {
   }, []);
 
   const subtotal = useMemo(
-    () =>
-      items.reduce(
-        (sum, item) =>
-          sum + Number(item.total_cost ?? item.service_cost ?? 0) * Number(item.quantity ?? 1),
-        0,
-      ),
+    () => items.reduce((sum, item) => sum + cartItemLineTotal(item), 0),
     [items],
   );
 
@@ -110,33 +105,25 @@ export default function CheckoutPage() {
     setBusy(true);
     try {
       if (method === "razor_pay") {
-        const key =
-          process.env.NEXT_PUBLIC_RAZORPAY_KEY ||
-          process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
-          config?.razorpay_key ||
-          config?.razorpayKey;
         const amount = Math.max(100, Math.round(subtotal * 100));
-        let orderId: string | undefined;
-        try {
-          const orderRes = await fetch("/api/razorpay/order", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ amount, currency: "INR" }),
-          });
-          if (orderRes.ok) {
-            const order = await orderRes.json();
-            orderId = order.id;
-          }
-        } catch {
-          /* fallback to key-only checkout */
+        const orderRes = await fetch("/api/razorpay/order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount, currency: "INR" }),
+        });
+        const order = (await orderRes.json()) as { id?: string; key?: string; error?: string };
+        if (!orderRes.ok || !order.id || !order.key) {
+          throw new Error(order.error || "Unable to create a secure payment order");
         }
-        if (!key || !window.Razorpay) {
+        const orderId = order.id;
+        const checkoutKey = order.key;
+        if (!window.Razorpay) {
           toast.error("Razorpay is not configured. You can still use other enabled methods.");
           setBusy(false);
           return;
         }
         const rzp = new window.Razorpay({
-          key,
+          key: checkoutKey,
           amount,
           currency: "INR",
           name: "MSTOO",

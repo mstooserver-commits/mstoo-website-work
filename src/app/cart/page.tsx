@@ -4,7 +4,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useCartStore } from "@/lib/stores/cart";
-import { servicePriceLabel } from "@/lib/currency";
+import { cartItemLineTotal, cartItemUnitPrice, formatInr } from "@/lib/currency";
 import { EmptyState } from "@/components/ui/states";
 
 export default function CartPage() {
@@ -34,7 +34,15 @@ export default function CartPage() {
       <h1 className="text-2xl font-bold">Cart</h1>
       {loading ? <p className="mt-6 text-muted">Loading…</p> : null}
       {items.length === 0 && !loading ? (
-        <EmptyState title="Your cart is empty" className="mt-6" action={<Link href="/" className="btn-primary">Browse ads</Link>} />
+        <EmptyState
+          title="Your cart is empty"
+          className="mt-6"
+          action={
+            <Link href="/" className="btn-primary">
+              Browse ads
+            </Link>
+          }
+        />
       ) : (
         <div className="mt-6 space-y-3">
           {items.map((item) => (
@@ -42,15 +50,26 @@ export default function CartPage() {
               <div>
                 <p className="font-semibold">{item.service?.name || item.variant_key}</p>
                 <p className="text-sm text-brand">
-                  {item.service ? servicePriceLabel(item.service) : ""} × {item.quantity}
+                  {formatInr(cartItemUnitPrice(item))} × {item.quantity ?? 1}
+                  <span className="ml-2 font-semibold text-ink">
+                    = {formatInr(cartItemLineTotal(item))}
+                  </span>
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <button className="btn-secondary px-3 py-1" onClick={() => item.id && updateQty(item.id, Math.max(1, (item.quantity || 1) - 1))}>
+                <button
+                  className="btn-secondary px-3 py-1"
+                  onClick={() =>
+                    item.id && updateQty(item.id, Math.max(1, Number(item.quantity ?? 1) - 1))
+                  }
+                >
                   -
                 </button>
                 <span>{item.quantity}</span>
-                <button className="btn-secondary px-3 py-1" onClick={() => item.id && updateQty(item.id, (item.quantity || 1) + 1)}>
+                <button
+                  className="btn-secondary px-3 py-1"
+                  onClick={() => item.id && updateQty(item.id, Number(item.quantity ?? 1) + 1)}
+                >
                   +
                 </button>
                 <button

@@ -255,12 +255,12 @@ export interface CartItem {
   category_id?: string;
   sub_category_id?: string;
   variant_key?: string;
-  quantity?: number;
-  service_cost?: number;
-  discounted_price?: number;
-  campaign_discount_price?: number;
-  coupon_discount_price?: number;
-  total_cost?: number;
+  quantity?: number | string;
+  service_cost?: number | string;
+  discounted_price?: number | string;
+  campaign_discount_price?: number | string;
+  coupon_discount_price?: number | string;
+  total_cost?: number | string;
   service?: Service;
   provider?: Provider;
 }
