@@ -85,12 +85,18 @@ export default function CheckoutPage() {
       toast.error("Pick a schedule");
       return;
     }
+    const zoneId =
+      list.find((address) => String(address.id) === addressId)?.zone_id || location?.zoneId;
+    if (!zoneId) {
+      toast.error("Select a service zone before checkout");
+      return;
+    }
+    const serviceSchedule = schedule.length === 16 ? `${schedule.replace("T", " ")}:00` : schedule;
     const body = {
       payment_method: method,
       service_address_id: addressId,
-      service_schedule: schedule,
-      zone_id:
-        list.find((address) => String(address.id) === addressId)?.zone_id || location?.zoneId,
+      service_schedule: serviceSchedule,
+      zone_id: zoneId,
       user_id: user?.id,
       note,
       ...extra,
@@ -105,54 +111,63 @@ export default function CheckoutPage() {
     setBusy(true);
     try {
       if (method === "razor_pay") {
-        const amount = Math.max(100, Math.round(subtotal * 100));
-        const orderRes = await fetch("/api/razorpay/order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ amount, currency: "INR" }),
-        });
-        const order = (await orderRes.json()) as { id?: string; key?: string; error?: string };
-        if (!orderRes.ok || !order.id || !order.key) {
-          throw new Error(order.error || "Unable to create a secure payment order");
+        const envelope = (await bookingApi.razorpay({})) as {
+          content?: { key?: string; order_id?: string; amount?: number; currency?: string };
+          message?: string;
+        };
+        const order = envelope.content;
+        if (!order?.order_id || !order.key || !order.amount) {
+          throw new Error(envelope.message || "Unable to create a secure payment order");
         }
-        const orderId = order.id;
-        const checkoutKey = order.key;
         if (!window.Razorpay) {
-          toast.error("Razorpay is not configured. You can still use other enabled methods.");
-          setBusy(false);
+          toast.error("Razorpay checkout could not load. Try again or use another payment method.");
           return;
         }
         const rzp = new window.Razorpay({
-          key: checkoutKey,
-          amount,
-          currency: "INR",
+          key: order.key,
+          amount: order.amount,
+          currency: order.currency || "INR",
           name: "MSTOO",
-          order_id: orderId,
+          order_id: order.order_id,
           handler: async (response: {
             razorpay_payment_id?: string;
             razorpay_order_id?: string;
             razorpay_signature?: string;
           }) => {
             try {
+              setBusy(true);
               await place({
                 razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_order_id: response.razorpay_order_id,
+                razorpay_order_id: response.razorpay_order_id || order.order_id,
                 razorpay_signature: response.razorpay_signature,
               });
             } catch (err) {
-              toast.error(err instanceof Error ? err.message : "Booking failed after payment");
+              toast.error(
+                err instanceof Error
+                  ? `${err.message}. Payment id: ${response.razorpay_payment_id || "unknown"}`
+                  : "Booking failed after payment",
+              );
+            } finally {
+              setBusy(false);
             }
           },
+          modal: {
+            ondismiss: () => setBusy(false),
+          },
+        });
+        rzp.on?.("payment.failed", () => {
+          toast.error("Payment failed");
+          setBusy(false);
         });
         rzp.open();
-        setBusy(false);
         return;
       }
       await place();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Checkout failed");
-    } finally {
       setBusy(false);
+    } finally {
+      if (method !== "razor_pay") setBusy(false);
     }
   };
 
