@@ -22,12 +22,22 @@ import { useConfigStore } from "@/lib/stores/config";
 import { useLocationStore } from "@/lib/stores/location";
 import { isFlagOn } from "@/lib/utils";
 import { paymentReturnFlag } from "@/lib/wallet-payment";
-import type { Address, Paginated } from "@/types";
+import type { Address } from "@/types";
 import { EmptyState } from "@/components/ui/states";
 
 function unwrapAddresses(payload: unknown): Address[] {
   if (Array.isArray(payload)) return payload as Address[];
-  return ((payload as Paginated<Address>)?.data || []) as Address[];
+  if (!payload || typeof payload !== "object") return [];
+
+  const body = payload as { data?: unknown; addresses?: unknown; content?: unknown };
+  for (const nested of [body.data, body.addresses, body.content]) {
+    if (Array.isArray(nested)) return nested as Address[];
+  }
+  for (const nested of [body.data, body.addresses, body.content]) {
+    const addresses = unwrapAddresses(nested);
+    if (addresses.length > 0) return addresses;
+  }
+  return [];
 }
 
 export default function CheckoutPage() {
