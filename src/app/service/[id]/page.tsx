@@ -23,13 +23,24 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   if (!service) {
     return pageMeta({ title: "Ad not found", description: "This MSTOO listing is unavailable.", path: `/service/${params.id}` });
   }
-  const desc = stripHtml(service.short_description || service.description) || `Rent ${service.name} on MSTOO`;
+  const details = [service.category?.name, service.location, servicePrice(service)]
+    .filter(Boolean)
+    .join(" | ");
+  const description = stripHtml(service.short_description || service.description);
+  const desc = [service.name, details, description || `Discover ${service.name} on MSTOO`]
+    .filter(Boolean)
+    .join(" | ");
   return pageMeta({
     title: service.name,
     description: desc.slice(0, 160),
     path: `/service/${params.id}`,
     image: serviceImage(service),
   });
+}
+
+function servicePrice(service: Service): string | undefined {
+  const price = service.display_price || service.price || service.min_price;
+  return price !== undefined && price !== null && price !== "" ? `Price: ${price}` : undefined;
 }
 
 export default async function ServicePage({ params }: { params: { id: string } }) {

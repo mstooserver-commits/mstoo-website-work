@@ -5,8 +5,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { MapPin, Phone, ShoppingCart, Star } from "lucide-react";
+import { Copy, MapPin, Phone, Share2, ShoppingCart, Star } from "lucide-react";
 import { catalogApi } from "@/lib/api";
+import { APP_URL } from "@/lib/constants";
 import { servicePriceLabel } from "@/lib/currency";
 import { serviceImageSources } from "@/lib/media";
 import { useAuthStore } from "@/lib/stores/auth";
@@ -74,6 +75,38 @@ export function ServiceDetailView({ service }: { service: Service }) {
     }
   };
 
+  const shareUrl = `${APP_URL}/service/${service.id}`;
+  const shareText = `${service.name}${service.location ? ` - ${service.location}` : ""}`;
+  const encodedUrl = encodeURIComponent(shareUrl);
+  const encodedText = encodeURIComponent(shareText);
+
+  const shareListing = async () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: service.name, text: shareText, url });
+        return;
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") return;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Ad link copied");
+    } catch {
+      toast.error("Could not share this ad");
+    }
+  };
+
+  const copyListingLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Ad link copied");
+    } catch {
+      toast.error("Could not copy the ad link");
+    }
+  };
+
   const relatedItems = (related.data?.data || []).filter((s) => s.id !== service.id).slice(0, 8);
   const reviewItems =
     (reviews.data?.data as
@@ -134,6 +167,41 @@ export function ServiceDetailView({ service }: { service: Service }) {
                 <Phone className="h-4 w-4" /> Contact
               </a>
             ) : null}
+          </div>
+          <div className="mt-5">
+            <p className="mb-2 text-sm font-semibold">Share this ad</p>
+            <div className="flex flex-wrap gap-2">
+              <button className="btn-secondary gap-2" onClick={() => void shareListing()}>
+                <Share2 className="h-4 w-4" /> Share
+              </button>
+              <button className="btn-secondary gap-2" onClick={() => void copyListingLink()}>
+                <Copy className="h-4 w-4" /> Copy link
+              </button>
+              <a
+                className="btn-secondary"
+                href={`https://wa.me/?text=${encodedText}%20${encodedUrl}`}
+                target="_blank"
+                rel="noreferrer"
+              >WhatsApp</a>
+              <a
+                className="btn-secondary"
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
+                target="_blank"
+                rel="noreferrer"
+              >Facebook</a>
+              <a
+                className="btn-secondary"
+                href={`https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`}
+                target="_blank"
+                rel="noreferrer"
+              >Telegram</a>
+              <a
+                className="btn-secondary"
+                href={`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`}
+                target="_blank"
+                rel="noreferrer"
+              >X</a>
+            </div>
           </div>
           <article className="prose mt-6 max-w-none text-sm text-ink">
             <h2 className="text-base font-semibold">About this listing</h2>
