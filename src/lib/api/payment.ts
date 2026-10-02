@@ -1,4 +1,5 @@
 import { API_BASE_URL, ENDPOINTS } from "@/lib/constants";
+import { resolveRazorpayPublicKey } from "@/lib/razorpay-env";
 
 export type ApiEnvelope<T> = {
   content?: T;
@@ -221,11 +222,11 @@ export async function openRazorpayCheckout({
 
   const config = await getConfig();
   const publicKey =
-    process.env.NEXT_PUBLIC_RAZORPAY_KEY ??
-    config.razorpay_key ??
-    config.razorpay_key_id ??
-    config.razorpayKey ??
-    config.razorpayKeyId ??
+    resolveRazorpayPublicKey(typeof window !== "undefined" ? window.location.href : process.env.NEXT_PUBLIC_APP_URL) ||
+    config.razorpay_key ||
+    config.razorpay_key_id ||
+    config.razorpayKey ||
+    config.razorpayKeyId ||
     "";
 
   if (!publicKey.trim()) {
