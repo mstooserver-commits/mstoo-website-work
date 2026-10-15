@@ -5,7 +5,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Copy, MapPin, Phone, Share2, ShoppingCart, Star } from "lucide-react";
+import {
+  BadgeCheck,
+  Copy,
+  MapPin,
+  Phone,
+  Share2,
+  ShoppingBag,
+  ShoppingCart,
+  Star,
+} from "lucide-react";
 import { catalogApi } from "@/lib/api";
 import { APP_URL } from "@/lib/constants";
 import { servicePriceLabel } from "@/lib/currency";
@@ -146,6 +155,65 @@ export function ServiceDetailView({ service }: { service: Service }) {
               {service.location}
             </p>
           ) : null}
+          <div className="mt-5 grid grid-cols-2 gap-3 rounded-xl border border-line bg-white p-4 sm:grid-cols-3">
+            {service.category?.name ? (
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-muted">
+                  Category
+                </p>
+                <p className="mt-1 text-sm font-semibold text-ink">{service.category.name}</p>
+              </div>
+            ) : null}
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-wide text-muted">Pricing</p>
+              <p className="mt-1 text-sm font-semibold text-ink">{servicePriceLabel(service)}</p>
+              {service.price_unit ? (
+                <p className="mt-0.5 text-xs text-muted">Per {service.price_unit}</p>
+              ) : null}
+            </div>
+            {service.availability ? (
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-muted">
+                  Availability
+                </p>
+                <p className="mt-1 flex items-center gap-1.5 text-sm font-semibold capitalize text-ink">
+                  <BadgeCheck className="h-4 w-4 text-success" />
+                  {service.availability}
+                </p>
+              </div>
+            ) : null}
+            {typeof service.distance === "number" ? (
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-muted">
+                  Distance
+                </p>
+                <p className="mt-1 text-sm font-semibold text-ink">
+                  {service.distance.toFixed(1)} km away
+                </p>
+              </div>
+            ) : null}
+            {Number(service.order_count) > 0 ? (
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-muted">
+                  Bookings
+                </p>
+                <p className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-ink">
+                  <ShoppingBag className="h-4 w-4 text-brand" />
+                  {service.order_count}
+                </p>
+              </div>
+            ) : null}
+            {Number(service.rating_count) > 0 ? (
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wide text-muted">
+                  Customer reviews
+                </p>
+                <p className="mt-1 text-sm font-semibold text-ink">
+                  {service.rating_count} reviews
+                </p>
+              </div>
+            ) : null}
+          </div>
           <div className="mt-6 flex flex-wrap gap-3">
             <button
               className="btn-primary"
@@ -182,25 +250,33 @@ export function ServiceDetailView({ service }: { service: Service }) {
                 href={`https://wa.me/?text=${encodedText}%20${encodedUrl}`}
                 target="_blank"
                 rel="noreferrer"
-              >WhatsApp</a>
+              >
+                WhatsApp
+              </a>
               <a
                 className="btn-secondary"
                 href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
                 target="_blank"
                 rel="noreferrer"
-              >Facebook</a>
+              >
+                Facebook
+              </a>
               <a
                 className="btn-secondary"
                 href={`https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`}
                 target="_blank"
                 rel="noreferrer"
-              >Telegram</a>
+              >
+                Telegram
+              </a>
               <a
                 className="btn-secondary"
                 href={`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`}
                 target="_blank"
                 rel="noreferrer"
-              >X</a>
+              >
+                X
+              </a>
             </div>
           </div>
           <article className="prose mt-6 max-w-none text-sm text-ink">

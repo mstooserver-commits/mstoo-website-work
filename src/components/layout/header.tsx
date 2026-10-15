@@ -3,16 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import {
-  Bell,
-  Heart,
-  MapPin,
-  Menu,
-  Search,
-  ShoppingCart,
-  UserRound,
-  X,
-} from "lucide-react";
+import { Bell, Heart, MapPin, Menu, Search, ShoppingCart, UserRound, X } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useCartStore } from "@/lib/stores/cart";
 import { useLocationStore } from "@/lib/stores/location";
@@ -21,8 +12,6 @@ import { cn } from "@/lib/utils";
 const NAV = [
   { href: "/", label: "Home" },
   { href: "/search", label: "Search" },
-  { href: "/offers", label: "Offers" },
-  { href: "/providers", label: "Providers" },
   { href: "/post-ad", label: "Post Ad" },
 ];
 
@@ -44,8 +33,8 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
-      <div className="container-page flex items-center gap-3 py-3">
+    <header className="sticky top-0 z-40 border-b border-line/70 bg-white/90 backdrop-blur md:border-0 md:bg-transparent md:px-4 md:pt-3">
+      <div className="container-page flex items-center gap-3 bg-white py-3 md:rounded-2xl md:border md:border-line/70 md:shadow-card">
         <Link href="/" className="shrink-0" aria-label="MSTOO home">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo.png" alt="MSTOO — Rent Lease & Hire" className="h-9 w-auto sm:h-10" />
@@ -80,7 +69,8 @@ export function Header() {
               href={item.href}
               className={cn(
                 "rounded-md px-3 py-2 text-sm font-medium text-ink hover:bg-brand-soft hover:text-brand",
-                item.href === "/post-ad" && "bg-post text-navy hover:bg-post-dark hover:text-navy",
+                item.href === "/post-ad" &&
+                  "bg-brand px-4 text-white shadow-fab hover:bg-brand-dark hover:text-white",
               )}
             >
               {item.label}
@@ -92,7 +82,11 @@ export function Header() {
           <Link href="/saved" className="rounded-md p-2 hover:bg-page" aria-label="Saved ads">
             <Heart className="h-5 w-5" />
           </Link>
-          <Link href="/notifications" className="hidden rounded-md p-2 hover:bg-page sm:block" aria-label="Notifications">
+          <Link
+            href="/notifications"
+            className="hidden rounded-md p-2 hover:bg-page sm:block"
+            aria-label="Notifications"
+          >
             <Bell className="h-5 w-5" />
           </Link>
           <Link href="/cart" className="relative rounded-md p-2 hover:bg-page" aria-label="Cart">
@@ -103,10 +97,19 @@ export function Header() {
               </span>
             ) : null}
           </Link>
-          <Link href={isLoggedIn ? "/profile" : "/login"} className="rounded-md p-2 hover:bg-page" aria-label="Account">
+          <Link
+            href={isLoggedIn ? "/profile" : "/login"}
+            className="rounded-md p-2 hover:bg-page"
+            aria-label="Account"
+          >
             <UserRound className="h-5 w-5" />
           </Link>
-          <button type="button" className="rounded-md p-2 lg:hidden" onClick={() => setOpen((v) => !v)} aria-label="Menu">
+          <button
+            type="button"
+            className="rounded-md p-2 lg:hidden"
+            onClick={() => setOpen((v) => !v)}
+            aria-label="Menu"
+          >
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
@@ -118,7 +121,9 @@ export function Header() {
         className="flex w-full items-center gap-2 border-t border-line bg-page px-4 py-2 text-left md:hidden"
       >
         <MapPin className="h-4 w-4 text-brand" />
-        <span className="truncate text-xs text-muted">{location?.address || "Set your location to see nearby ads"}</span>
+        <span className="truncate text-xs text-muted">
+          {location?.address || "Set your location to see nearby ads"}
+        </span>
       </button>
 
       {open ? (
@@ -133,7 +138,12 @@ export function Header() {
           </form>
           <div className="flex flex-col">
             {NAV.map((item) => (
-              <Link key={item.href} href={item.href} className="py-2 text-sm font-medium" onClick={() => setOpen(false)}>
+              <Link
+                key={item.href}
+                href={item.href}
+                className="py-2 text-sm font-medium"
+                onClick={() => setOpen(false)}
+              >
                 {item.label}
               </Link>
             ))}
@@ -141,7 +151,9 @@ export function Header() {
               Bookings
             </Link>
             <p className="pt-2 text-xs text-muted">
-              {isLoggedIn ? `Hi, ${user?.first_name || "there"}` : "Sign in to book, chat and post ads"}
+              {isLoggedIn
+                ? `Hi, ${user?.first_name || "there"}`
+                : "Sign in to book, chat and post ads"}
             </p>
           </div>
         </div>

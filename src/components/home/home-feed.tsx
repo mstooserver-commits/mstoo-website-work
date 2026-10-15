@@ -7,7 +7,6 @@ import { mediaFallbacks } from "@/lib/media";
 import { useLocationStore } from "@/lib/stores/location";
 import { useConfigStore } from "@/lib/stores/config";
 import { BannerCarousel } from "@/components/catalog/banner-carousel";
-import { CategoryTile } from "@/components/catalog/category-tile";
 import { ServiceGrid } from "@/components/service/service-card";
 import { ServiceCardSkeleton } from "@/components/ui/skeleton";
 import { EmptyState, ErrorState } from "@/components/ui/states";
@@ -24,7 +23,8 @@ function featuredFrom(payload: unknown): { category?: Category; services?: Servi
   if (!payload) return [];
   if (Array.isArray(payload)) return payload as { category?: Category; services?: Service[] }[];
   const content = payload as { data?: unknown; category?: Category };
-  if (Array.isArray(content.data)) return content.data as { category?: Category; services?: Service[] }[];
+  if (Array.isArray(content.data))
+    return content.data as { category?: Category; services?: Service[] }[];
   return [];
 }
 
@@ -39,11 +39,6 @@ export function HomeFeed() {
     queryKey: ["banners", zoneId],
     enabled: Boolean(zoneId),
     queryFn: () => catalogApi.banners(),
-  });
-  const categories = useQuery({
-    queryKey: ["categories", zoneId],
-    enabled: Boolean(zoneId),
-    queryFn: () => catalogApi.categories(),
   });
   const campaigns = useQuery({
     queryKey: ["campaigns", zoneId],
@@ -86,13 +81,14 @@ export function HomeFeed() {
   }
 
   const bannerItems = list<Banner>(banners.data);
-  const categoryItems = list<Category>(categories.data);
   const campaignItems = list<Campaign>(campaigns.data);
   const nearbyItems = list<Service>(nearby.data);
 
   return (
     <div className="space-y-10">
-      {banners.isError ? <ErrorState message="Could not load banners" onRetry={() => banners.refetch()} /> : null}
+      {banners.isError ? (
+        <ErrorState message="Could not load banners" onRetry={() => banners.refetch()} />
+      ) : null}
 
       {bannerItems.length > 0 ? (
         <BannerCarousel banners={bannerItems} />
@@ -100,28 +96,22 @@ export function HomeFeed() {
         <div className="h-44 animate-pulse rounded-lg bg-line" />
       ) : null}
 
-      <section>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-bold">Popular Categories</h2>
-          <Link href="/categories" className="text-sm font-medium text-brand">
-            View all
-          </Link>
-        </div>
-        <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 lg:grid-cols-8">
-          {categoryItems.slice(0, 8).map((cat) => (
-            <CategoryTile key={cat.id} category={cat} href={`/category/${cat.id}`} />
-          ))}
-        </div>
-      </section>
-
       {campaignItems.length > 0 ? (
         <section>
-          <h2 className="mb-3 text-lg font-bold">Campaigns</h2>
+          <h2 className="mb-4 text-xl font-extrabold">Latest campaigns</h2>
           <div className="flex gap-3 overflow-x-auto pb-2">
             {campaignItems.map((c) => (
-              <Link key={c.id} href={`/search?campaign=${c.id}`} className="card min-w-[220px] overflow-hidden">
+              <Link
+                key={c.id}
+                href={`/search?campaign=${c.id}`}
+                className="card min-w-[220px] overflow-hidden"
+              >
                 <SafeImage
-                  src={mediaFallbacks(c.thumbnail || c.cover_image || c.image, "campaign", imageBase)}
+                  src={mediaFallbacks(
+                    c.thumbnail || c.cover_image || c.image,
+                    "campaign",
+                    imageBase,
+                  )}
                   alt={c.title || "Campaign"}
                   className="h-28 w-full"
                 />
@@ -133,8 +123,18 @@ export function HomeFeed() {
       ) : null}
 
       <HomeSection title="Near you" href="/search?sort=nearby" query={nearby} items={nearbyItems} />
-      <HomeSection title="Popular" href="/search?sort=popular" query={popular} items={list<Service>(popular.data)} />
-      <HomeSection title="Trending" href="/search?sort=trending" query={trending} items={list<Service>(trending.data)} />
+      <HomeSection
+        title="Popular"
+        href="/search?sort=popular"
+        query={popular}
+        items={list<Service>(popular.data)}
+      />
+      <HomeSection
+        title="Trending"
+        href="/search?sort=trending"
+        query={trending}
+        items={list<Service>(trending.data)}
+      />
       <HomeSection
         title="Recommended"
         href="/search?sort=recommended"
@@ -177,9 +177,9 @@ function HomeSection({
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-bold">{title}</h2>
-        <Link href={href} className="text-sm font-medium text-brand">
-          See all
+        <h2 className="text-xl font-extrabold">{title}</h2>
+        <Link href={href} className="text-sm font-semibold text-brand">
+          View all <span aria-hidden="true">→</span>
         </Link>
       </div>
       {query.isLoading ? (
@@ -189,7 +189,10 @@ function HomeSection({
           ))}
         </div>
       ) : query.isError ? (
-        <ErrorState message={`Could not load ${title.toLowerCase()}`} onRetry={() => query.refetch()} />
+        <ErrorState
+          message={`Could not load ${title.toLowerCase()}`}
+          onRetry={() => query.refetch()}
+        />
       ) : items.length === 0 ? (
         <EmptyState
           title={`No ${title.toLowerCase()} ads in this zone`}
