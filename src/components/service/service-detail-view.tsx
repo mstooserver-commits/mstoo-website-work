@@ -22,7 +22,7 @@ import { serviceImageSources } from "@/lib/media";
 import { useAuthStore } from "@/lib/stores/auth";
 import { useCartStore } from "@/lib/stores/cart";
 import { useConfigStore } from "@/lib/stores/config";
-import { isFlagOn } from "@/lib/utils";
+import { isFlagOn, stripHtml } from "@/lib/utils";
 import type { Service } from "@/types";
 import { SafeImage } from "@/components/ui/safe-image";
 import { ServiceGrid } from "@/components/service/service-card";
@@ -135,6 +135,8 @@ export function ServiceDetailView({ service }: { service: Service }) {
             src={serviceImageSources(service)}
             alt={service.name}
             className="aspect-[4/3] w-full"
+            fallback="/cover-img.png"
+            fallbackClassName="object-contain"
           />
         </div>
         <div>
@@ -282,7 +284,8 @@ export function ServiceDetailView({ service }: { service: Service }) {
           <article className="prose mt-6 max-w-none text-sm text-ink">
             <h2 className="text-base font-semibold">About this listing</h2>
             <p className="whitespace-pre-wrap text-muted">
-              {service.description || service.short_description || "No description provided."}
+              {stripHtml(service.description || service.short_description) ||
+                "No description provided."}
             </p>
           </article>
         </div>

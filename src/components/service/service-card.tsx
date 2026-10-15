@@ -16,8 +16,14 @@ export function ServiceCard({ service }: { service: Service }) {
       href={href}
       className="card group overflow-hidden rounded-xl transition hover:-translate-y-0.5 hover:shadow-lg"
     >
-      <div className="relative aspect-[16/10] bg-page">
-        <SafeImage src={img} alt={service.name} className="h-full w-full" />
+      <div className="relative aspect-video overflow-hidden bg-white">
+        <SafeImage
+          src={img}
+          alt={service.name}
+          className="h-full w-full"
+          fallback="/cover-img.png"
+          fallbackClassName="object-contain"
+        />
         {featured ? (
           <span className="absolute left-3 top-3 rounded-full bg-brand px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
             Featured

@@ -26,7 +26,13 @@ export default function MyAdsPage() {
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {items.map((s) => (
           <Link key={s.id} href={`/service/${s.id}`} className="card flex gap-3 p-3">
-            <SafeImage src={serviceImageSources(s)} alt={s.name} className="h-20 w-20 rounded-md" />
+            <SafeImage
+              src={serviceImageSources(s)}
+              alt={s.name}
+              className="h-20 w-24 rounded-md bg-white"
+              fallback="/cover-img.png"
+              fallbackClassName="object-contain"
+            />
             <div>
               <p className="font-semibold">{s.name}</p>
               <p className="text-sm text-muted">{s.availability}</p>
@@ -34,7 +40,9 @@ export default function MyAdsPage() {
           </Link>
         ))}
       </div>
-      {q.isFetched && items.length === 0 ? <EmptyState title="You have not posted any ads" className="mt-6" /> : null}
+      {q.isFetched && items.length === 0 ? (
+        <EmptyState title="You have not posted any ads" className="mt-6" />
+      ) : null}
     </div>
   );
 }

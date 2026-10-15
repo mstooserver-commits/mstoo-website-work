@@ -8,9 +8,16 @@ type Props = {
   alt: string;
   className?: string;
   fallback?: string;
+  fallbackClassName?: string;
 };
 
-export function SafeImage({ src, alt, className, fallback = "/logo.png" }: Props) {
+export function SafeImage({
+  src,
+  alt,
+  className,
+  fallback = "/logo.png",
+  fallbackClassName,
+}: Props) {
   const candidates = useMemo(() => {
     const list = Array.isArray(src) ? src : [src];
     return list.map((item) => (item || "").trim()).filter(Boolean);
@@ -30,7 +37,7 @@ export function SafeImage({ src, alt, className, fallback = "/logo.png" }: Props
     <img
       src={url || fallback}
       alt={alt}
-      className={cn("object-cover", className)}
+      className={cn("object-cover", className, exhausted && fallbackClassName)}
       onError={() => {
         setIndex((current) => (current < candidates.length ? current + 1 : current));
       }}

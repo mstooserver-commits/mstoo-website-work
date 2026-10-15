@@ -10,6 +10,7 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { LocationPicker } from "@/components/location/location-picker";
 import { LocationGate } from "@/components/location/location-gate";
 import { MaintenanceBanner } from "@/components/layout/maintenance-banner";
+import { PostAdFab } from "@/components/layout/post-ad-fab";
 
 const font = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -52,6 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <LocationPicker />
           <main className="min-h-[70vh]">{children}</main>
           <Footer />
+          <PostAdFab />
           <BottomNav />
         </AppProviders>
       </body>
