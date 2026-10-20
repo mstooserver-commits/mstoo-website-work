@@ -19,15 +19,6 @@ function list<T>(payload: Paginated<T> | T[] | undefined): T[] {
   return payload.data ?? [];
 }
 
-function featuredFrom(payload: unknown): { category?: Category; services?: Service[] }[] {
-  if (!payload) return [];
-  if (Array.isArray(payload)) return payload as { category?: Category; services?: Service[] }[];
-  const content = payload as { data?: unknown; category?: Category };
-  if (Array.isArray(content.data))
-    return content.data as { category?: Category; services?: Service[] }[];
-  return [];
-}
-
 export function HomeFeed() {
   const location = useLocationStore((s) => s.location);
   const imageBase = useConfigStore((s) => s.config?.image_base_url);
@@ -46,9 +37,9 @@ export function HomeFeed() {
     queryFn: () => catalogApi.campaigns(),
   });
   const featured = useQuery({
-    queryKey: ["featured-cats", zoneId],
+    queryKey: ["featured-ads", zoneId],
     enabled: Boolean(zoneId),
-    queryFn: () => catalogApi.featuredCategories(),
+    queryFn: () => catalogApi.home(),
   });
   const popular = useQuery({
     queryKey: ["popular", zoneId],
@@ -122,6 +113,13 @@ export function HomeFeed() {
         </section>
       ) : null}
 
+      <HomeSection
+        title="Featured ads"
+        href="/search?featured=yes"
+        query={featured}
+        items={featured.data?.featured_ads ?? []}
+      />
+
       <HomeSection title="Near you" href="/search?sort=nearby" query={nearby} items={nearbyItems} />
       <HomeSection
         title="Popular"
@@ -141,24 +139,6 @@ export function HomeFeed() {
         query={recommended}
         items={list<Service>(recommended.data)}
       />
-
-      {featuredFrom(featured.data).map((block, i) => {
-        const services = block.services ?? [];
-        if (!services.length) return null;
-        return (
-          <section key={block.category?.id || i}>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-lg font-bold">{block.category?.name || "Featured"}</h2>
-              {block.category?.id ? (
-                <Link href={`/category/${block.category.id}`} className="text-sm text-brand">
-                  See all
-                </Link>
-              ) : null}
-            </div>
-            <ServiceGrid services={services.slice(0, 8)} />
-          </section>
-        );
-      })}
     </div>
   );
 }

@@ -44,6 +44,7 @@ export const ENDPOINTS = {
   placeDetails: "/api/v1/customer/config/place-api-details",
   geocode: "/api/v1/customer/config/geocode-api",
   landing: "/api/v1/customer/landing/contents",
+  webHome: "/api/v1/customer/web/home",
 
   register: "/api/v1/customer/auth/registration",
   login: "/api/v1/customer/auth/login",
@@ -140,6 +141,7 @@ export const ENDPOINTS = {
   customPostBidDetails: "/api/v1/customer/post/bid/details",
 
   addService: "/api/v1/provider/add_service",
+  featuredAdOrder: "/api/v1/provider/featured-ad/razorpay-order",
   getAllCat: "/api/v1/getallcat",
   getAllSubCat: "/api/v1/getallsubcatbyid/",
   getFieldsById: "/api/v1/getfieldsbyid/",

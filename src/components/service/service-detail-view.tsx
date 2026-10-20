@@ -29,6 +29,49 @@ import type { Service } from "@/types";
 import { SafeImage } from "@/components/ui/safe-image";
 import { ServiceGrid } from "@/components/service/service-card";
 
+type DetailRow = { label: string; value: unknown };
+
+function hasDetailValue(value: unknown) {
+  return value !== null && value !== undefined && String(value).trim() !== "";
+}
+
+function displayDetailValue(value: unknown) {
+  if (Array.isArray(value)) return value.join(", ");
+  if (typeof value !== "string") return String(value);
+  if (value.startsWith("[") && value.endsWith("]")) {
+    try {
+      const parsed = JSON.parse(value) as unknown;
+      if (Array.isArray(parsed)) return parsed.join(", ");
+    } catch {
+      // The API also permits plain text in this field.
+    }
+  }
+  return value;
+}
+
+function DetailCard({ title, rows }: { title: string; rows: DetailRow[] }) {
+  const visibleRows = rows.filter((row) => hasDetailValue(row.value));
+  if (!visibleRows.length) return null;
+  return (
+    <section className="card p-5">
+      <h2 className="text-lg font-bold">{title}</h2>
+      <dl className="mt-4 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+        {visibleRows.map((row, index) => (
+          <div
+            key={`${row.label}-${index}`}
+            className="flex items-start justify-between gap-4 border-b border-line pb-2"
+          >
+            <dt className="text-sm text-muted">{row.label}</dt>
+            <dd className="text-right text-sm font-semibold capitalize text-ink">
+              {displayDetailValue(row.value)}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
 export function ServiceDetailView({ service }: { service: Service }) {
   const router = useRouter();
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
@@ -133,6 +176,52 @@ export function ServiceDetailView({ service }: { service: Service }) {
           customer?: { first_name?: string };
         }[]
       | undefined) || [];
+  const rentalDetails: DetailRow[] = [
+    { label: "Category", value: service.category?.name },
+    { label: "Property type", value: service.property_type },
+    { label: "Bedrooms", value: service.bedrooms },
+    { label: "Bathrooms", value: service.bathrooms },
+    { label: "Square footage", value: service.square_footage },
+    { label: "Furnished", value: service.furnished },
+    { label: "Vehicle type", value: service.vehicle_type },
+    { label: "Brand", value: service.vehicle_brand },
+    { label: "Model", value: service.model_year },
+    { label: "Mileage", value: service.mileage },
+    { label: "Fuel", value: service.fuel_type },
+    { label: "Transmission", value: service.transmission },
+    { label: "Electronic type", value: service.electronic_type },
+    { label: "Brand", value: service.electronic_brand },
+    { label: "Operating system", value: service.operating_system },
+    { label: "Screen size", value: service.screen_size },
+    { label: "Storage capacity", value: service.storage_capacity },
+    { label: "Camera resolution", value: service.camera_resolution },
+    { label: "Connectivity", value: service.connectivity },
+    { label: "Equipment type", value: service.equipment_type },
+    { label: "Brand", value: service.equipment_brand },
+    { label: "Power source", value: service.power_source },
+    { label: "Weight capacity", value: service.weight_capacity },
+    { label: "Dimensions", value: service.dimensions },
+    { label: "Service type", value: service.service_type },
+    { label: "Furniture type", value: service.furniture_type },
+    { label: "Brand", value: service.furniture_brand },
+    { label: "Clothing type", value: service.cloth_type },
+    { label: "Size", value: service.cloth_size },
+    { label: "Brand", value: service.cloth_brand },
+    { label: "Condition", value: service.condition },
+    { label: "Available on", value: service.availability_date },
+  ];
+  const termsDetails: DetailRow[] = [
+    { label: "Security deposit", value: service.deposits },
+    { label: "Documents required", value: service.doc_required },
+    { label: "Delivery / pickup", value: service.delivery_pickup },
+    { label: "Utilities", value: service.utilities },
+    { label: "Pets", value: service.pets },
+    { label: "Safety information", value: service.safety },
+    { label: "Terms and conditions", value: service.t_and_c },
+  ];
+  const ownerName = [service.poster?.first_name, service.poster?.last_name]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div className="container-page py-8">
@@ -344,6 +433,32 @@ export function ServiceDetailView({ service }: { service: Service }) {
                 "No description provided."}
             </p>
           </article>
+        </div>
+      </div>
+
+      <div className="mt-10 grid gap-5 lg:grid-cols-2">
+        <DetailCard title="Rental information" rows={rentalDetails} />
+        <div className="space-y-5">
+          {hasDetailValue(service.additional_info) ? (
+            <section className="card p-5">
+              <h2 className="text-lg font-bold">Additional information</h2>
+              <p className="mt-3 whitespace-pre-line text-sm leading-6 text-muted">
+                {stripHtml(service.additional_info || "")}
+              </p>
+            </section>
+          ) : null}
+          <DetailCard title="Rental terms" rows={termsDetails} />
+          {service.poster ? (
+            <section className="card p-5">
+              <h2 className="text-lg font-bold">Owner</h2>
+              <p className="mt-3 font-semibold text-ink">{ownerName || "MSTOO member"}</p>
+              <p className="mt-1 text-sm text-muted">
+                {Number(service.poster.is_phone_verified) === 1
+                  ? "Verified phone"
+                  : "Owner details available"}
+              </p>
+            </section>
+          ) : null}
         </div>
       </div>
 

@@ -66,7 +66,10 @@ const CAT_ICON: Record<string, typeof Car> = {
 
 function unwrapPredictions(payload: unknown): PlacePrediction[] {
   if (Array.isArray(payload)) return payload as PlacePrediction[];
-  const body = payload as { predictions?: PlacePrediction[]; content?: { predictions?: PlacePrediction[] } };
+  const body = payload as {
+    predictions?: PlacePrediction[];
+    content?: { predictions?: PlacePrediction[] };
+  };
   return body?.predictions || body?.content?.predictions || [];
 }
 
@@ -130,7 +133,9 @@ function Chips({
             type="button"
             onClick={() => {
               if (multiple) {
-                const next = on ? selected.filter((item) => item !== option) : [...selected, option];
+                const next = on
+                  ? selected.filter((item) => item !== option)
+                  : [...selected, option];
                 onChange(next);
               } else {
                 onChange(on ? "" : option);
@@ -138,7 +143,9 @@ function Chips({
             }}
             className={cn(
               "rounded-full border px-3 py-1.5 text-sm capitalize transition",
-              on ? "border-brand bg-brand-soft font-semibold text-brand" : "border-line bg-white text-ink hover:border-brand/40",
+              on
+                ? "border-brand bg-brand-soft font-semibold text-brand"
+                : "border-line bg-white text-ink hover:border-brand/40",
             )}
           >
             {option}
@@ -166,26 +173,54 @@ function CategoryDetails({
   };
 }) {
   if (!cat) {
-    return <p className="text-sm text-muted">Choose a category first. You can skip extra specs if none apply.</p>;
+    return (
+      <p className="text-sm text-muted">
+        Choose a category first. You can skip extra specs if none apply.
+      </p>
+    );
   }
   if (cat === "vehicle") {
     return (
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Brand / make" required>
-          <input className="input" placeholder="Tata, Honda" value={values.vehicleBrand} onChange={(e) => set({ vehicleBrand: e.target.value })} />
+          <input
+            className="input"
+            placeholder="Tata, Honda"
+            value={values.vehicleBrand}
+            onChange={(e) => set({ vehicleBrand: e.target.value })}
+          />
         </Field>
         <Field label="Model year" required>
-          <input className="input" inputMode="numeric" placeholder="2022" value={values.modelYear} onChange={(e) => set({ modelYear: e.target.value })} />
+          <input
+            className="input"
+            inputMode="numeric"
+            placeholder="2022"
+            value={values.modelYear}
+            onChange={(e) => set({ modelYear: e.target.value })}
+          />
         </Field>
         <Field label="Mileage" required>
-          <input className="input" placeholder="25000 km" value={values.mileage} onChange={(e) => set({ mileage: e.target.value })} />
+          <input
+            className="input"
+            placeholder="25000 km"
+            value={values.mileage}
+            onChange={(e) => set({ mileage: e.target.value })}
+          />
         </Field>
         <Field label="Fuel type">
-          <Chips options={lists.fuel} value={values.fuelType} onChange={(v) => set({ fuelType: String(v) })} />
+          <Chips
+            options={lists.fuel}
+            value={values.fuelType}
+            onChange={(v) => set({ fuelType: String(v) })}
+          />
         </Field>
         <div className="sm:col-span-2">
           <Field label="Transmission">
-            <Chips options={lists.transmission} value={values.transmission} onChange={(v) => set({ transmission: String(v) })} />
+            <Chips
+              options={lists.transmission}
+              value={values.transmission}
+              onChange={(v) => set({ transmission: String(v) })}
+            />
           </Field>
         </div>
       </div>
@@ -195,28 +230,68 @@ function CategoryDetails({
     return (
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Product type" required>
-          <input className="input" placeholder="Laptop, mobile, camera" value={values.electronicType} onChange={(e) => set({ electronicType: e.target.value })} />
+          <input
+            className="input"
+            placeholder="Laptop, mobile, camera"
+            value={values.electronicType}
+            onChange={(e) => set({ electronicType: e.target.value })}
+          />
         </Field>
         <Field label="Brand" required>
-          <input className="input" placeholder="Apple, Sony" value={values.electronicBrand} onChange={(e) => set({ electronicBrand: e.target.value })} />
+          <input
+            className="input"
+            placeholder="Apple, Sony"
+            value={values.electronicBrand}
+            onChange={(e) => set({ electronicBrand: e.target.value })}
+          />
         </Field>
         <Field label="Model year">
-          <input className="input" placeholder="2024" value={values.modelYear} onChange={(e) => set({ modelYear: e.target.value })} />
+          <input
+            className="input"
+            placeholder="2024"
+            value={values.modelYear}
+            onChange={(e) => set({ modelYear: e.target.value })}
+          />
         </Field>
         <Field label="Screen size">
-          <input className="input" placeholder="6.1 inch" value={values.screenSize} onChange={(e) => set({ screenSize: e.target.value })} />
+          <input
+            className="input"
+            placeholder="6.1 inch"
+            value={values.screenSize}
+            onChange={(e) => set({ screenSize: e.target.value })}
+          />
         </Field>
         <Field label="Storage">
-          <input className="input" placeholder="256 GB" value={values.storage} onChange={(e) => set({ storage: e.target.value })} />
+          <input
+            className="input"
+            placeholder="256 GB"
+            value={values.storage}
+            onChange={(e) => set({ storage: e.target.value })}
+          />
         </Field>
         <Field label="Operating system">
-          <input className="input" placeholder="iOS, Android, Windows" value={values.operatingSystem} onChange={(e) => set({ operatingSystem: e.target.value })} />
+          <input
+            className="input"
+            placeholder="iOS, Android, Windows"
+            value={values.operatingSystem}
+            onChange={(e) => set({ operatingSystem: e.target.value })}
+          />
         </Field>
         <Field label="Camera">
-          <input className="input" placeholder="48 MP" value={values.camera} onChange={(e) => set({ camera: e.target.value })} />
+          <input
+            className="input"
+            placeholder="48 MP"
+            value={values.camera}
+            onChange={(e) => set({ camera: e.target.value })}
+          />
         </Field>
         <Field label="Connectivity">
-          <input className="input" placeholder="Wi-Fi, Bluetooth, 5G" value={values.connectivity} onChange={(e) => set({ connectivity: e.target.value })} />
+          <input
+            className="input"
+            placeholder="Wi-Fi, Bluetooth, 5G"
+            value={values.connectivity}
+            onChange={(e) => set({ connectivity: e.target.value })}
+          />
         </Field>
       </div>
     );
@@ -225,20 +300,45 @@ function CategoryDetails({
     return (
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Equipment type" required>
-          <input className="input" placeholder="Fitness, construction" value={values.equipmentType} onChange={(e) => set({ equipmentType: e.target.value })} />
+          <input
+            className="input"
+            placeholder="Fitness, construction"
+            value={values.equipmentType}
+            onChange={(e) => set({ equipmentType: e.target.value })}
+          />
         </Field>
         <Field label="Brand" required>
-          <input className="input" placeholder="Hitachi, Bosch" value={values.equipmentBrand} onChange={(e) => set({ equipmentBrand: e.target.value })} />
+          <input
+            className="input"
+            placeholder="Hitachi, Bosch"
+            value={values.equipmentBrand}
+            onChange={(e) => set({ equipmentBrand: e.target.value })}
+          />
         </Field>
         <Field label="Power source">
-          <input className="input" placeholder="Electric, diesel" value={values.powerSource} onChange={(e) => set({ powerSource: e.target.value })} />
+          <input
+            className="input"
+            placeholder="Electric, diesel"
+            value={values.powerSource}
+            onChange={(e) => set({ powerSource: e.target.value })}
+          />
         </Field>
         <Field label="Weight">
-          <input className="input" placeholder="12 kg" value={values.weight} onChange={(e) => set({ weight: e.target.value })} />
+          <input
+            className="input"
+            placeholder="12 kg"
+            value={values.weight}
+            onChange={(e) => set({ weight: e.target.value })}
+          />
         </Field>
         <div className="sm:col-span-2">
           <Field label="Dimensions">
-            <input className="input" placeholder="L x W x H" value={values.dimensions} onChange={(e) => set({ dimensions: e.target.value })} />
+            <input
+              className="input"
+              placeholder="L x W x H"
+              value={values.dimensions}
+              onChange={(e) => set({ dimensions: e.target.value })}
+            />
           </Field>
         </div>
       </div>
@@ -248,10 +348,20 @@ function CategoryDetails({
     return (
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Furniture type" required>
-          <input className="input" placeholder="Sofa, chair, table" value={values.furnitureType} onChange={(e) => set({ furnitureType: e.target.value })} />
+          <input
+            className="input"
+            placeholder="Sofa, chair, table"
+            value={values.furnitureType}
+            onChange={(e) => set({ furnitureType: e.target.value })}
+          />
         </Field>
         <Field label="Brand" required>
-          <input className="input" placeholder="Wooden Street, Hometown" value={values.furnitureBrand} onChange={(e) => set({ furnitureBrand: e.target.value })} />
+          <input
+            className="input"
+            placeholder="Wooden Street, Hometown"
+            value={values.furnitureBrand}
+            onChange={(e) => set({ furnitureBrand: e.target.value })}
+          />
         </Field>
       </div>
     );
@@ -260,20 +370,46 @@ function CategoryDetails({
     return (
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Property type" required>
-          <input className="input" placeholder="Apartment, house" value={values.propertyType} onChange={(e) => set({ propertyType: e.target.value })} />
+          <input
+            className="input"
+            placeholder="Apartment, house"
+            value={values.propertyType}
+            onChange={(e) => set({ propertyType: e.target.value })}
+          />
         </Field>
         <Field label="Square footage" required>
-          <input className="input" placeholder="1200 sq ft" value={values.squareFootage} onChange={(e) => set({ squareFootage: e.target.value })} />
+          <input
+            className="input"
+            placeholder="1200 sq ft"
+            value={values.squareFootage}
+            onChange={(e) => set({ squareFootage: e.target.value })}
+          />
         </Field>
         <Field label="Bedrooms" required>
-          <input className="input" inputMode="numeric" placeholder="2" value={values.bedrooms} onChange={(e) => set({ bedrooms: e.target.value })} />
+          <input
+            className="input"
+            inputMode="numeric"
+            placeholder="2"
+            value={values.bedrooms}
+            onChange={(e) => set({ bedrooms: e.target.value })}
+          />
         </Field>
         <Field label="Bathrooms" required>
-          <input className="input" inputMode="numeric" placeholder="2" value={values.bathrooms} onChange={(e) => set({ bathrooms: e.target.value })} />
+          <input
+            className="input"
+            inputMode="numeric"
+            placeholder="2"
+            value={values.bathrooms}
+            onChange={(e) => set({ bathrooms: e.target.value })}
+          />
         </Field>
         <div className="sm:col-span-2">
           <Field label="Furnishing">
-            <Chips options={lists.furnished} value={values.furnished} onChange={(v) => set({ furnished: String(v) })} />
+            <Chips
+              options={lists.furnished}
+              value={values.furnished}
+              onChange={(v) => set({ furnished: String(v) })}
+            />
           </Field>
         </div>
       </div>
@@ -283,14 +419,28 @@ function CategoryDetails({
     return (
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Item type" required>
-          <input className="input" placeholder="Saree, lehenga, sherwani" value={values.clothType} onChange={(e) => set({ clothType: e.target.value })} />
+          <input
+            className="input"
+            placeholder="Saree, lehenga, sherwani"
+            value={values.clothType}
+            onChange={(e) => set({ clothType: e.target.value })}
+          />
         </Field>
         <Field label="Brand">
-          <input className="input" placeholder="Zara, H&M" value={values.clothBrand} onChange={(e) => set({ clothBrand: e.target.value })} />
+          <input
+            className="input"
+            placeholder="Zara, H&M"
+            value={values.clothBrand}
+            onChange={(e) => set({ clothBrand: e.target.value })}
+          />
         </Field>
         <div className="sm:col-span-2">
           <Field label="Size" required>
-            <Chips options={lists.clothSize} value={values.clothSize} onChange={(v) => set({ clothSize: String(v) })} />
+            <Chips
+              options={lists.clothSize}
+              value={values.clothSize}
+              onChange={(v) => set({ clothSize: String(v) })}
+            />
           </Field>
         </div>
       </div>
@@ -299,11 +449,20 @@ function CategoryDetails({
   if (cat === "service") {
     return (
       <Field label="Service type" required>
-        <input className="input" placeholder="Home service, professional service" value={values.serviceType} onChange={(e) => set({ serviceType: e.target.value })} />
+        <input
+          className="input"
+          placeholder="Home service, professional service"
+          value={values.serviceType}
+          onChange={(e) => set({ serviceType: e.target.value })}
+        />
       </Field>
     );
   }
-  return <p className="text-sm text-muted">No extra specs for this category. Continue to price and photos.</p>;
+  return (
+    <p className="text-sm text-muted">
+      No extra specs for this category. Continue to price and photos.
+    </p>
+  );
 }
 
 export function PostAdForm() {
@@ -437,11 +596,21 @@ export function PostAdForm() {
           setFeaturedPrice(Number.isFinite(price) ? price : 50);
           setFeaturedDays(String(data.featured_days || "30 days"));
           setLists({
-            fuel: asStringList(data.fuel_type).length ? asStringList(data.fuel_type) : FALLBACK_FUEL,
-            transmission: asStringList(data.transmission).length ? asStringList(data.transmission) : FALLBACK_TRANSMISSION,
-            clothSize: asStringList(data.cloth_size).length ? asStringList(data.cloth_size) : FALLBACK_CLOTH_SIZES,
-            furnished: asStringList(data.furnished).length ? asStringList(data.furnished) : FALLBACK_FURNISHED,
-            condition: asStringList(data.condition).length ? asStringList(data.condition) : FALLBACK_CONDITION,
+            fuel: asStringList(data.fuel_type).length
+              ? asStringList(data.fuel_type)
+              : FALLBACK_FUEL,
+            transmission: asStringList(data.transmission).length
+              ? asStringList(data.transmission)
+              : FALLBACK_TRANSMISSION,
+            clothSize: asStringList(data.cloth_size).length
+              ? asStringList(data.cloth_size)
+              : FALLBACK_CLOTH_SIZES,
+            furnished: asStringList(data.furnished).length
+              ? asStringList(data.furnished)
+              : FALLBACK_FURNISHED,
+            condition: asStringList(data.condition).length
+              ? asStringList(data.condition)
+              : FALLBACK_CONDITION,
           });
         }
         set({ catName });
@@ -520,7 +689,11 @@ export function PostAdForm() {
     setStep((s) => Math.min(POST_STEPS.length - 1, s + 1));
   };
 
-  const buildForm = async (payment?: { order_id?: string; payment_id?: string }) => {
+  const buildForm = async (payment?: {
+    order_id?: string;
+    payment_id?: string;
+    signature?: string;
+  }) => {
     const cover = await fileToBase64(photos[0]);
     const form = new FormData();
     form.append("name", values.name.trim());
@@ -535,12 +708,17 @@ export function PostAdForm() {
     form.append("longitude", String(values.lng));
     if (payment?.order_id) form.append("order_id", payment.order_id);
     if (payment?.payment_id) form.append("payment_id", payment.payment_id);
+    if (payment?.signature) form.append("signature", payment.signature);
     appendCategoryFields(form, values);
     photos.forEach((file) => form.append("images[]", file, file.name));
     return form;
   };
 
-  const publish = async (payment?: { order_id?: string; payment_id?: string }) => {
+  const publish = async (payment?: {
+    order_id?: string;
+    payment_id?: string;
+    signature?: string;
+  }) => {
     setBusy(true);
     try {
       await providerApi.addService(await buildForm(payment));
@@ -568,36 +746,41 @@ export function PostAdForm() {
       process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
       config?.razorpay_key ||
       config?.razorpayKey;
-    if (!key || !window.Razorpay) {
+    if (!window.Razorpay) {
       toast.error("Razorpay is not configured for featured ads");
       return;
     }
-    const amount = Math.max(100, Math.round(featuredPrice * 100));
     let orderId: string | undefined;
+    let amount = Math.max(100, Math.round(featuredPrice * 100));
+    let checkoutKey = key || "";
     try {
-      const orderRes = await fetch("/api/razorpay/order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount, currency: "INR" }),
-      });
-      if (orderRes.ok) {
-        const order = await orderRes.json();
-        orderId = order.id;
-      }
-    } catch {
-      /* key-only checkout */
+      const orderRes = await providerApi.featuredAdOrder(values.subId);
+      const order = orderRes.content;
+      if (!order?.order_id || !order.amount) throw new Error("Could not create featured ad order");
+      orderId = order.order_id;
+      amount = order.amount;
+      checkoutKey = order.key || key || "";
+      if (!checkoutKey) throw new Error("Razorpay is not configured for featured ads");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not start featured ad payment");
+      return;
     }
     const rzp = new window.Razorpay({
-      key,
+      key: checkoutKey,
       amount,
       currency: "INR",
       name: "MSTOO",
       description: `Featured ad for ${featuredDays}`,
       order_id: orderId,
-      handler: async (response: { razorpay_payment_id?: string; razorpay_order_id?: string }) => {
+      handler: async (response: {
+        razorpay_payment_id?: string;
+        razorpay_order_id?: string;
+        razorpay_signature?: string;
+      }) => {
         await publish({
           payment_id: response.razorpay_payment_id,
           order_id: response.razorpay_order_id || orderId,
+          signature: response.razorpay_signature,
         });
       },
     }) as { open: () => void; on?: (event: string, handler: (response: unknown) => void) => void };
@@ -643,16 +826,21 @@ export function PostAdForm() {
     );
   };
 
-  const previewPrice = values.price ? `${formatInr(Number(values.price) || 0)} ${rentLabel.toLowerCase()}` : "Set a price";
+  const previewPrice = values.price
+    ? `${formatInr(Number(values.price) || 0)} ${rentLabel.toLowerCase()}`
+    : "Set a price";
 
   return (
     <div className="bg-page pb-28 md:pb-10">
       <section className="bg-[linear-gradient(135deg,#D93F46_0%,#AC2A29_55%,#7a1e1e_100%)] text-white">
         <div className="container-page py-8 md:py-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">List on MSTOO</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">
+            List on MSTOO
+          </p>
           <h1 className="mt-2 text-3xl font-bold md:text-4xl">Post an ad</h1>
           <p className="mt-2 max-w-xl text-sm text-white/85">
-            Same listing fields as the MSTOO app. Clear photos and accurate details help renters book faster.
+            Same listing fields as the MSTOO app. Clear photos and accurate details help renters
+            book faster.
           </p>
         </div>
       </section>
@@ -666,7 +854,10 @@ export function PostAdForm() {
             <span>{POST_STEPS[step].title}</span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-line">
-            <div className="h-full rounded-full bg-brand transition-all" style={{ width: `${((step + 1) / POST_STEPS.length) * 100}%` }} />
+            <div
+              className="h-full rounded-full bg-brand transition-all"
+              style={{ width: `${((step + 1) / POST_STEPS.length) * 100}%` }}
+            />
           </div>
           <div className="mt-3 hidden gap-2 md:grid md:grid-cols-5">
             {POST_STEPS.map((item, index) => (
@@ -678,7 +869,11 @@ export function PostAdForm() {
                 }}
                 className={cn(
                   "rounded-md px-2 py-2 text-left text-xs",
-                  index === step ? "bg-brand-soft text-brand" : index < step ? "bg-page text-ink" : "text-muted",
+                  index === step
+                    ? "bg-brand-soft text-brand"
+                    : index < step
+                      ? "bg-page text-ink"
+                      : "text-muted",
                 )}
               >
                 <span className="block font-semibold">
@@ -715,7 +910,9 @@ export function PostAdForm() {
                           onClick={() => set({ catId: cat.id, catName: key, subId: "" })}
                           className={cn(
                             "flex items-center gap-2 rounded-lg border px-3 py-3 text-left text-sm font-medium transition",
-                            on ? "border-brand bg-brand-soft text-brand" : "border-line bg-white hover:border-brand/40",
+                            on
+                              ? "border-brand bg-brand-soft text-brand"
+                              : "border-line bg-white hover:border-brand/40",
                           )}
                         >
                           <Icon className="h-4 w-4 shrink-0" />
@@ -726,7 +923,9 @@ export function PostAdForm() {
                   </div>
                 </Field>
                 <Field label="Sub category" required>
-                  {loadingFields ? <p className="text-sm text-muted">Loading sub categories…</p> : null}
+                  {loadingFields ? (
+                    <p className="text-sm text-muted">Loading sub categories…</p>
+                  ) : null}
                   <div className="flex flex-wrap gap-2">
                     {subs.map((sub) => (
                       <button
@@ -735,14 +934,18 @@ export function PostAdForm() {
                         onClick={() => set({ subId: sub.id })}
                         className={cn(
                           "rounded-full border px-3 py-1.5 text-sm",
-                          values.subId === sub.id ? "border-brand bg-brand-soft font-semibold text-brand" : "border-line hover:border-brand/40",
+                          values.subId === sub.id
+                            ? "border-brand bg-brand-soft font-semibold text-brand"
+                            : "border-line hover:border-brand/40",
                         )}
                       >
                         {sub.name}
                       </button>
                     ))}
                     {!loadingFields && values.catId && subs.length === 0 ? (
-                      <p className="text-sm text-muted">No sub categories found for this category.</p>
+                      <p className="text-sm text-muted">
+                        No sub categories found for this category.
+                      </p>
                     ) : null}
                   </div>
                 </Field>
@@ -761,7 +964,10 @@ export function PostAdForm() {
               <div className="card space-y-4 p-5">
                 <div>
                   <h2 className="text-lg font-bold">Item details</h2>
-                  <p className="mt-1 text-sm text-muted">Add specs for {selectedCat?.name || "this category"}. Skip anything that does not apply.</p>
+                  <p className="mt-1 text-sm text-muted">
+                    Add specs for {selectedCat?.name || "this category"}. Skip anything that does
+                    not apply.
+                  </p>
                 </div>
                 <CategoryDetails cat={values.catName} values={values} set={set} lists={lists} />
               </div>
@@ -771,7 +977,11 @@ export function PostAdForm() {
               <div className="card space-y-5 p-5">
                 <Field label="Rental price" required>
                   <div className="grid gap-3 sm:grid-cols-[180px_minmax(0,1fr)]">
-                    <select className="input" value={values.rent} onChange={(e) => set({ rent: e.target.value })}>
+                    <select
+                      className="input"
+                      value={values.rent}
+                      onChange={(e) => set({ rent: e.target.value })}
+                    >
                       {RENT_OPTIONS.map((option) => (
                         <option key={option.value} value={option.value}>
                           {option.label}
@@ -791,7 +1001,11 @@ export function PostAdForm() {
                   </div>
                 </Field>
                 <Field label="Condition">
-                  <Chips options={lists.condition} value={values.condition} onChange={(v) => set({ condition: String(v) })} />
+                  <Chips
+                    options={lists.condition}
+                    value={values.condition}
+                    onChange={(v) => set({ condition: String(v) })}
+                  />
                 </Field>
               </div>
             ) : null}
@@ -799,7 +1013,11 @@ export function PostAdForm() {
             {step === 3 ? (
               <div className="space-y-4">
                 <div className="card space-y-4 p-5">
-                  <Field label="Description" required hint="Describe condition, what is included, and rental terms.">
+                  <Field
+                    label="Description"
+                    required
+                    hint="Describe condition, what is included, and rental terms."
+                  >
                     <textarea
                       className="input min-h-36"
                       placeholder="Describe condition, what is included, and rental terms…"
@@ -809,7 +1027,11 @@ export function PostAdForm() {
                   </Field>
                 </div>
                 <div className="card space-y-3 p-5">
-                  <Field label="Product photos" required hint="Add up to 8 clear photos. The first photo is the cover.">
+                  <Field
+                    label="Product photos"
+                    required
+                    hint="Add up to 8 clear photos. The first photo is the cover."
+                  >
                     <input
                       ref={fileRef}
                       type="file"
@@ -873,7 +1095,11 @@ export function PostAdForm() {
                         }}
                       />
                     </div>
-                    <button type="button" className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-brand" onClick={useCurrent}>
+                    <button
+                      type="button"
+                      className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-brand"
+                      onClick={useCurrent}
+                    >
                       <Navigation className="h-4 w-4" />
                       Use current location
                     </button>
@@ -881,7 +1107,11 @@ export function PostAdForm() {
                       <ul className="mt-2 divide-y divide-line rounded-md border border-line bg-white">
                         {places.map((place) => (
                           <li key={place.place_id}>
-                            <button type="button" className="flex w-full items-start gap-2 px-3 py-2 text-left text-sm hover:bg-page" onClick={() => void selectPlace(place)}>
+                            <button
+                              type="button"
+                              className="flex w-full items-start gap-2 px-3 py-2 text-left text-sm hover:bg-page"
+                              onClick={() => void selectPlace(place)}
+                            >
                               <MapPin className="mt-0.5 h-4 w-4 text-brand" />
                               {place.description}
                             </button>
@@ -909,57 +1139,108 @@ export function PostAdForm() {
                   <Field label="Availability date" required>
                     <div className="relative">
                       <Calendar className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-muted" />
-                      <input className="input pl-9" type="date" value={values.availabilityDate} onChange={(e) => set({ availabilityDate: e.target.value })} />
+                      <input
+                        className="input pl-9"
+                        type="date"
+                        value={values.availabilityDate}
+                        onChange={(e) => set({ availabilityDate: e.target.value })}
+                      />
                     </div>
                   </Field>
                   <Field label="Contact number" required>
                     <div className="relative">
-                      <input className="input pl-9" inputMode="tel" placeholder="9876543210" value={values.contact} onChange={(e) => set({ contact: e.target.value })} />
+                      <input
+                        className="input pl-9"
+                        inputMode="tel"
+                        placeholder="9876543210"
+                        value={values.contact}
+                        onChange={(e) => set({ contact: e.target.value })}
+                      />
                     </div>
                   </Field>
                   <div className="sm:col-span-2">
                     <Field label="Deposit and security">
-                      <textarea className="input min-h-20" placeholder="e.g. ₹2000 refundable deposit, ID required" value={values.deposits} onChange={(e) => set({ deposits: e.target.value })} />
+                      <textarea
+                        className="input min-h-20"
+                        placeholder="e.g. ₹2000 refundable deposit, ID required"
+                        value={values.deposits}
+                        onChange={(e) => set({ deposits: e.target.value })}
+                      />
                     </Field>
                   </div>
                   <div className="sm:col-span-2">
                     <Field label="Documents required">
-                      <textarea className="input min-h-20" placeholder="e.g. Aadhaar, driving licence" value={values.documents} onChange={(e) => set({ documents: e.target.value })} />
+                      <textarea
+                        className="input min-h-20"
+                        placeholder="e.g. Aadhaar, driving licence"
+                        value={values.documents}
+                        onChange={(e) => set({ documents: e.target.value })}
+                      />
                     </Field>
                   </div>
                   <div className="sm:col-span-2">
                     <Field label="Additional information">
-                      <textarea className="input min-h-20" placeholder="Any extra details for renters" value={values.additional} onChange={(e) => set({ additional: e.target.value })} />
+                      <textarea
+                        className="input min-h-20"
+                        placeholder="Any extra details for renters"
+                        value={values.additional}
+                        onChange={(e) => set({ additional: e.target.value })}
+                      />
                     </Field>
                   </div>
                   {values.catName === "property" ? (
                     <>
                       <div className="sm:col-span-2">
                         <Field label="Utilities included">
-                          <Chips multiple options={UTILITY_OPTIONS} value={values.utilities} onChange={(v) => set({ utilities: v as string[] })} />
+                          <Chips
+                            multiple
+                            options={UTILITY_OPTIONS}
+                            value={values.utilities}
+                            onChange={(v) => set({ utilities: v as string[] })}
+                          />
                         </Field>
                       </div>
                       <div className="sm:col-span-2">
                         <Field label="Pets">
-                          <Chips multiple options={PET_OPTIONS} value={values.pets} onChange={(v) => set({ pets: v as string[] })} />
+                          <Chips
+                            multiple
+                            options={PET_OPTIONS}
+                            value={values.pets}
+                            onChange={(v) => set({ pets: v as string[] })}
+                          />
                         </Field>
                       </div>
                     </>
                   ) : (
                     <div className="sm:col-span-2">
                       <Field label="Delivery / pickup">
-                        <Chips multiple options={DELIVERY_OPTIONS} value={values.delivery} onChange={(v) => set({ delivery: v as string[] })} />
+                        <Chips
+                          multiple
+                          options={DELIVERY_OPTIONS}
+                          value={values.delivery}
+                          onChange={(v) => set({ delivery: v as string[] })}
+                        />
                       </Field>
                     </div>
                   )}
                   <div className="sm:col-span-2">
                     <Field label="Safety guidelines">
-                      <textarea className="input min-h-20" placeholder="e.g. Return with full tank, no smoking" value={values.safety} onChange={(e) => set({ safety: e.target.value })} />
+                      <textarea
+                        className="input min-h-20"
+                        placeholder="e.g. Return with full tank, no smoking"
+                        value={values.safety}
+                        onChange={(e) => set({ safety: e.target.value })}
+                      />
                     </Field>
                   </div>
                   <div className="sm:col-span-2">
                     <Field label="Your rental terms">
-                      <textarea className="input min-h-20" placeholder="e.g. Late return fee, cancellation policy" value={values.terms} onChange={(e) => set({ terms: e.target.value })} />
+                      <textarea
+                        className="input min-h-20"
+                        placeholder="e.g. Late return fee, cancellation policy"
+                        value={values.terms}
+                        onChange={(e) => set({ terms: e.target.value })}
+                      />
                     </Field>
                   </div>
                 </div>
@@ -978,7 +1259,9 @@ export function PostAdForm() {
                       Highlight your listing in search and category pages for {featuredDays}.
                     </p>
                     {values.featured ? (
-                      <p className="mt-2 text-sm font-semibold text-navy">Charges: {formatInr(featuredPrice)}</p>
+                      <p className="mt-2 text-sm font-semibold text-navy">
+                        Charges: {formatInr(featuredPrice)}
+                      </p>
                     ) : null}
                   </div>
                   <button
@@ -986,9 +1269,17 @@ export function PostAdForm() {
                     role="switch"
                     aria-checked={values.featured}
                     onClick={() => set({ featured: !values.featured })}
-                    className={cn("relative h-7 w-12 rounded-full transition", values.featured ? "bg-post" : "bg-line")}
+                    className={cn(
+                      "relative h-7 w-12 rounded-full transition",
+                      values.featured ? "bg-post" : "bg-line",
+                    )}
                   >
-                    <span className={cn("absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition", values.featured ? "left-5" : "left-0.5")} />
+                    <span
+                      className={cn(
+                        "absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition",
+                        values.featured ? "left-5" : "left-0.5",
+                      )}
+                    />
                   </button>
                 </div>
                 <ul className="space-y-2 text-sm text-ink/90">
@@ -1010,7 +1301,11 @@ export function PostAdForm() {
 
             <div className="flex gap-3">
               {step > 0 ? (
-                <button type="button" className="btn-secondary flex-1 gap-1" onClick={() => setStep((s) => s - 1)}>
+                <button
+                  type="button"
+                  className="btn-secondary flex-1 gap-1"
+                  onClick={() => setStep((s) => s - 1)}
+                >
                   <ChevronLeft className="h-4 w-4" />
                   Back
                 </button>
@@ -1045,18 +1340,24 @@ export function PostAdForm() {
                   </div>
                 )}
                 {values.featured ? (
-                  <span className="absolute left-3 top-3 rounded-full bg-post px-2 py-0.5 text-[11px] font-bold text-navy">Featured</span>
+                  <span className="absolute left-3 top-3 rounded-full bg-post px-2 py-0.5 text-[11px] font-bold text-navy">
+                    Featured
+                  </span>
                 ) : null}
               </div>
               <div className="space-y-2 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted">{selectedCat?.name || "Category"}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+                  {selectedCat?.name || "Category"}
+                </p>
                 <h2 className="text-lg font-bold leading-snug">{values.name || "Your ad title"}</h2>
                 <p className="text-brand font-semibold">{previewPrice}</p>
                 <p className="flex items-start gap-1 text-xs text-muted">
                   <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                   {values.address || "Location will appear here"}
                 </p>
-                <p className="line-clamp-4 text-sm text-ink/80">{values.desc || "Write a description so renters know what they are booking."}</p>
+                <p className="line-clamp-4 text-sm text-ink/80">
+                  {values.desc || "Write a description so renters know what they are booking."}
+                </p>
               </div>
             </div>
           </aside>

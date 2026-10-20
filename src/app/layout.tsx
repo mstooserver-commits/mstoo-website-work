@@ -29,7 +29,22 @@ export const metadata: Metadata = {
   applicationName: APP_NAME,
   keywords: ["MSTOO", "rent", "lease", "hire", "classifieds", "India", "on-demand booking"],
   manifest: "/manifest.json",
-  icons: { icon: "/logo.png", apple: "/logo.png" },
+  icons: {
+    icon: [
+      {
+        url: "/web-app-manifest-192x192.png",
+        type: "image/png",
+        sizes: "192x192",
+      },
+      {
+        url: "/web-app-manifest-512x512.png",
+        type: "image/png",
+        sizes: "512x512",
+      },
+    ],
+    shortcut: "/web-app-manifest-192x192.png",
+    apple: [{ url: "/web-app-manifest-192x192.png", sizes: "192x192", type: "image/png" }],
+  },
 };
 
 export const viewport: Viewport = {

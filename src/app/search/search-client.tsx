@@ -23,6 +23,7 @@ export default function SearchClient() {
   const q = params.get("q") || "";
   const categoryId = params.get("category") || "";
   const sort = params.get("sort") || "";
+  const featured = params.get("featured") === "yes";
   const location = useLocationStore((s) => s.location);
   const setPickerOpen = useLocationStore((s) => s.setPickerOpen);
   const [min, setMin] = useState("");
@@ -34,7 +35,7 @@ export default function SearchClient() {
   const [condition, setCondition] = useState("any");
   const [minRating, setMinRating] = useState("0");
   const [availableOnly, setAvailableOnly] = useState(false);
-  const [featuredOnly, setFeaturedOnly] = useState(false);
+  const [featuredOnly, setFeaturedOnly] = useState(featured);
   const [sortBy, setSortBy] = useState(sort || "newest");
   const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
@@ -45,6 +46,7 @@ export default function SearchClient() {
     q,
     categoryId,
     sort,
+    featured,
     min,
     max,
     subcategory,
@@ -62,7 +64,8 @@ export default function SearchClient() {
     setCategory(categoryId);
     setSubcategory("");
     setSortBy(sort || "newest");
-  }, [q, categoryId, sort]);
+    setFeaturedOnly(featured);
+  }, [q, categoryId, sort, featured]);
 
   const categories = useQuery({
     queryKey: ["categories", location?.zoneId],

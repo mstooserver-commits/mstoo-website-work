@@ -56,6 +56,7 @@ export const authApi = {
 };
 
 export const catalogApi = {
+  home: () => apiGet<{ featured_ads?: Service[] }>(ENDPOINTS.webHome, { limit: 12 }),
   banners: () => apiGet<Paginated<Banner>>(ENDPOINTS.banner, { limit: 10, offset: 1 }),
   categories: () => apiGet<Paginated<Category>>(ENDPOINTS.category, { limit: 100, offset: 1 }),
   children: (id: string) =>
@@ -145,6 +146,10 @@ export const providerApi = {
   details: (id: string) => apiGet<Provider>(ENDPOINTS.providerDetails, { id }),
   myAds: () => apiPost(ENDPOINTS.myServices, {}),
   addService: (form: FormData) => apiUpload(ENDPOINTS.addService, form),
+  featuredAdOrder: (sub_category_id: string) =>
+    apiPost<
+      LaravelResponse<{ key?: string; order_id?: string; amount?: number; currency?: string }>
+    >(ENDPOINTS.featuredAdOrder, { sub_category_id }),
   postCategories: () => apiGet<Array<{ id?: string; name?: string }>>(ENDPOINTS.getAllCat),
   postSubcategories: (id: string) =>
     apiGet<Array<{ id?: string; name?: string }>>(`${ENDPOINTS.getAllSubCat}${id}`),

@@ -34,8 +34,8 @@ export default function ReferEarnPage() {
         <Users className="mx-auto h-12 w-12" />
         <h1 className="mt-3 text-3xl font-extrabold">Refer &amp; earn</h1>
         <p className="mx-auto mt-2 max-w-md text-sm text-white/85">
-          Invite friends and businesses to MSTOO. Share your personal code and earn rewards when
-          eligible referrals complete the required activity.
+          Invite friends and businesses to MSTOO. When a friend registers with your personal code,
+          your reward is added directly to your wallet.
         </p>
       </div>
 
@@ -64,7 +64,7 @@ export default function ReferEarnPage() {
         {[
           "Share your code",
           "Friend registers",
-          reward > 0 ? `Earn up to ${formatInr(reward)}` : "Earn rewards",
+          reward > 0 ? `Earn ${formatInr(reward)}` : "Earn rewards",
         ].map((step, index) => (
           <div key={step} className="card p-4 text-center text-sm">
             <Wallet className="mx-auto mb-2 h-5 w-5 text-brand" />
