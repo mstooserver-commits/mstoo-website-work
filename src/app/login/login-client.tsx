@@ -11,6 +11,7 @@ import { isValidIndiaPhone, normalizeIndiaPhone } from "@/lib/phone";
 import { useAuthStore } from "@/lib/stores/auth";
 import { ApiError } from "@/lib/errors";
 import { useCartStore } from "@/lib/stores/cart";
+import { safeRedirectPath } from "@/lib/navigation";
 
 const schema = z.object({
   identity: z.string().min(8, "Enter phone or email"),
@@ -48,7 +49,7 @@ export default function LoginClient() {
       await persist(token);
       await loadCart();
       toast.success("Welcome back");
-      router.push(params.get("redirect") || "/");
+      router.push(safeRedirectPath(params.get("redirect")));
     } catch (err) {
       const code = err instanceof ApiError ? err.code : "";
       const unverified = code === "unverified_phone_401" || code === "unverified_email_401";

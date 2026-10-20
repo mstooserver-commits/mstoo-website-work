@@ -7,6 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   BadgeCheck,
+  ChevronLeft,
+  ChevronRight,
   Copy,
   MapPin,
   Phone,
@@ -33,6 +35,11 @@ export function ServiceDetailView({ service }: { service: Service }) {
   const addCart = useCartStore((s) => s.add);
   const config = useConfigStore((s) => s.config);
   const [adding, setAdding] = useState<"cart" | "booking" | null>(null);
+  const gallery = serviceImageSources(service);
+  const [activeImage, setActiveImage] = useState(0);
+  const previousImage = () =>
+    setActiveImage((current) => (current - 1 + gallery.length) % gallery.length);
+  const nextImage = () => setActiveImage((current) => (current + 1) % gallery.length);
   const variant =
     service.variations_app_format?.zone_wise_variations?.[0]?.variant_key ||
     service.variations?.[0]?.variant_key ||
@@ -130,14 +137,63 @@ export function ServiceDetailView({ service }: { service: Service }) {
   return (
     <div className="container-page py-8">
       <div className="grid gap-8 lg:grid-cols-2">
-        <div className="overflow-hidden rounded-lg bg-white shadow-card">
-          <SafeImage
-            src={serviceImageSources(service)}
-            alt={service.name}
-            className="aspect-[4/3] w-full"
-            fallback="/cover-img.png"
-            fallbackClassName="object-contain"
-          />
+        <div>
+          <div className="group relative overflow-hidden rounded-lg bg-white shadow-card">
+            <SafeImage
+              src={
+                gallery[activeImage]
+                  ? [gallery[activeImage], ...gallery.filter((_, i) => i !== activeImage)]
+                  : gallery
+              }
+              alt={`${service.name} photo ${activeImage + 1}`}
+              className="aspect-[4/3] w-full"
+              fallback="/cover-img.png"
+              fallbackClassName="object-contain"
+            />
+            {gallery.length > 1 ? (
+              <>
+                <button
+                  type="button"
+                  onClick={previousImage}
+                  aria-label="Previous photo"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-card transition hover:bg-white"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={nextImage}
+                  aria-label="Next photo"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-card transition hover:bg-white"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+                <span className="absolute bottom-3 right-3 rounded-full bg-black/65 px-2.5 py-1 text-xs font-semibold text-white">
+                  {activeImage + 1} / {gallery.length}
+                </span>
+              </>
+            ) : null}
+          </div>
+          {gallery.length > 1 ? (
+            <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6" aria-label="Listing photos">
+              {gallery.map((image, index) => (
+                <button
+                  type="button"
+                  key={`${image}-${index}`}
+                  onClick={() => setActiveImage(index)}
+                  className={`overflow-hidden rounded-lg border-2 ${activeImage === index ? "border-brand" : "border-transparent"}`}
+                  aria-label={`View photo ${index + 1}`}
+                >
+                  <SafeImage
+                    src={image}
+                    alt=""
+                    className="aspect-square w-full"
+                    fallback="/cover-img.png"
+                  />
+                </button>
+              ))}
+            </div>
+          ) : null}
         </div>
         <div>
           <p className="text-sm text-brand">{service.category?.name}</p>
@@ -283,7 +339,7 @@ export function ServiceDetailView({ service }: { service: Service }) {
           </div>
           <article className="prose mt-6 max-w-none text-sm text-ink">
             <h2 className="text-base font-semibold">About this listing</h2>
-            <p className="whitespace-pre-wrap text-muted">
+            <p className="whitespace-pre-line leading-6 text-muted">
               {stripHtml(service.description || service.short_description) ||
                 "No description provided."}
             </p>

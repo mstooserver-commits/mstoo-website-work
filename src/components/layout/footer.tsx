@@ -60,6 +60,9 @@ const COMPANY = [
   { href: "/refund", label: "Refund" },
   { href: "/cancellation", label: "Cancellation" },
   { href: "/support", label: "Help & Support" },
+  { href: "/chat", label: "Live Chat" },
+  { href: "/pro-member", label: "MSTOO Pro" },
+  { href: "/refer-earn", label: "Refer & Earn" },
 ];
 
 export function Footer() {
@@ -75,8 +78,9 @@ export function Footer() {
         <div>
           <h3 className="text-base font-bold">About MSTOO</h3>
           <p className="mt-3 text-sm leading-relaxed text-muted">
-            Connecting communities with seamless rental solutions. Discover local businesses, post ads for free, and
-            manage bookings on the go. Experience the convenience and efficiency of MSTOO today!
+            Connecting communities with seamless rental solutions. Discover local businesses, post
+            ads for free, and manage bookings on the go. Experience the convenience and efficiency
+            of MSTOO today!
           </p>
           <p className="mt-4 text-sm text-ink">
             E-mail:{" "}
@@ -112,12 +116,22 @@ export function Footer() {
           <h3 className="text-base font-bold">Downloads</h3>
           <ul className="mt-3 space-y-2 text-sm">
             <li>
-              <a href={appStore} target="_blank" rel="noopener noreferrer" className="text-brand hover:underline">
+              <a
+                href={appStore}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand hover:underline"
+              >
                 Get from the App Store
               </a>
             </li>
             <li>
-              <a href={playStore} target="_blank" rel="noopener noreferrer" className="text-brand hover:underline">
+              <a
+                href={playStore}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-brand hover:underline"
+              >
                 Get from the Play Store
               </a>
             </li>

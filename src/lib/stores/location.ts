@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { COOKIES, DEFAULT_LOCATION, STORAGE_KEYS } from "@/lib/constants";
 import { locationApi } from "@/lib/api";
 import type { SavedLocation, Zone } from "@/types";
+import { nearestIndiaCity } from "@/lib/india-cities";
 
 type LocationState = {
   location: SavedLocation | null;
@@ -11,7 +12,12 @@ type LocationState = {
   setPickerOpen: (open: boolean) => void;
   hydrate: () => void;
   setLocation: (location: SavedLocation) => void;
-  resolveFromCoords: (lat: number, lng: number, address?: string) => Promise<SavedLocation>;
+  resolveFromCoords: (
+    lat: number,
+    lng: number,
+    address?: string,
+    city?: string,
+  ) => Promise<SavedLocation>;
   requestBrowserLocation: () => Promise<SavedLocation>;
   applyDefaultLocation: () => Promise<SavedLocation>;
 };
@@ -35,11 +41,11 @@ function readStored(): SavedLocation | null {
     /* ignore */
   }
   try {
-    const match = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith(`${COOKIES.location}=`));
+    const match = document.cookie.split("; ").find((row) => row.startsWith(`${COOKIES.location}=`));
     if (!match) return null;
-    const parsed = JSON.parse(decodeURIComponent(match.split("=").slice(1).join("="))) as SavedLocation;
+    const parsed = JSON.parse(
+      decodeURIComponent(match.split("=").slice(1).join("=")),
+    ) as SavedLocation;
     if (parsed?.zoneId && parsed.lat && parsed.lng) return parsed;
   } catch {
     /* ignore */
@@ -47,37 +53,68 @@ function readStored(): SavedLocation | null {
   return null;
 }
 
-function parseGeocodeAddress(payload: unknown): string {
+function parseGeocode(payload: unknown): { address: string; city?: string } {
   const body = payload as {
-    results?: { formatted_address?: string }[];
-    content?: { results?: { formatted_address?: string }[]; formatted_address?: string };
+    results?: {
+      formatted_address?: string;
+      address_components?: { long_name?: string; types?: string[] }[];
+    }[];
+    content?: {
+      results?: {
+        formatted_address?: string;
+        address_components?: { long_name?: string; types?: string[] }[];
+      }[];
+      formatted_address?: string;
+    };
     formatted_address?: string;
   };
-  return (
-    body?.results?.[0]?.formatted_address ||
-    body?.content?.results?.[0]?.formatted_address ||
-    body?.content?.formatted_address ||
-    body?.formatted_address ||
-    ""
-  );
+  const result = body?.results?.[0] || body?.content?.results?.[0];
+  const address =
+    result?.formatted_address || body?.content?.formatted_address || body?.formatted_address || "";
+  const city = result?.address_components?.find((component) =>
+    component.types?.some((type) =>
+      ["locality", "postal_town", "administrative_area_level_2"].includes(type),
+    ),
+  )?.long_name;
+  return { address, city };
 }
 
-function parsePlaceLatLng(payload: unknown): { lat: number; lng: number; address?: string } | null {
+async function fallbackReverseGeocode(lat: number, lng: number) {
+  const response = await fetch(`/api/location?lat=${lat}&lng=${lng}`);
+  if (!response.ok) return { address: "", city: "" };
+  const body = (await response.json()) as {
+    display_name?: string;
+    address?: { city?: string; town?: string; village?: string; county?: string };
+  };
+  return {
+    address: body.display_name || "",
+    city:
+      body.address?.city || body.address?.town || body.address?.village || body.address?.county || "",
+  };
+}
+
+function parsePlaceLatLng(
+  payload: unknown,
+): { lat: number; lng: number; address?: string; city?: string } | null {
   const root = payload as Record<string, unknown>;
   const content = (root?.content ?? root) as Record<string, unknown>;
   const result = (content?.result ?? content) as Record<string, unknown>;
   const geometry = (result?.geometry ?? content?.geometry) as
-    | { location?: { lat?: number; lng?: number } }
-    | undefined;
+    { location?: { lat?: number; lng?: number } } | undefined;
   const loc = geometry?.location;
   const lat = Number(loc?.lat);
   const lng = Number(loc?.lng);
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
   const address =
-    (result?.formatted_address as string) ||
-    (content?.formatted_address as string) ||
-    undefined;
-  return { lat, lng, address };
+    (result?.formatted_address as string) || (content?.formatted_address as string) || undefined;
+  const components = (result?.address_components ?? content?.address_components) as
+    { long_name?: string; types?: string[] }[] | undefined;
+  const city = components?.find((component) =>
+    component.types?.some((type) =>
+      ["locality", "postal_town", "administrative_area_level_2"].includes(type),
+    ),
+  )?.long_name;
+  return { lat, lng, address, city };
 }
 
 export const useLocationStore = create<LocationState>((set, get) => ({
@@ -102,24 +139,36 @@ export const useLocationStore = create<LocationState>((set, get) => ({
     persistCookies(location);
     set({ location, ready: true, denied: false, pickerOpen: false });
   },
-  resolveFromCoords: async (lat, lng, address) => {
+  resolveFromCoords: async (lat, lng, address, suppliedCity) => {
     const zone = (await locationApi.zone(lat, lng)) as Zone;
     let resolvedAddress = address ?? "";
+    let city = suppliedCity ?? "";
     if (!resolvedAddress) {
       try {
         const geo = await locationApi.geocode(lat, lng);
-        resolvedAddress = parseGeocodeAddress(geo) || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        const parsed = parseGeocode(geo);
+        const fallback = parsed.address ? null : await fallbackReverseGeocode(lat, lng);
+        resolvedAddress = parsed.address || fallback?.address || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        city = parsed.city || fallback?.city || "";
       } catch {
-        resolvedAddress = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+        const fallback = await fallbackReverseGeocode(lat, lng).catch(() => null);
+        resolvedAddress = fallback?.address || "";
+        city = fallback?.city || "";
       }
     }
     if (!zone?.id) {
       throw new Error("This area is not currently serviceable. Pick another location.");
     }
+    const nearest = nearestIndiaCity(lat, lng);
+    if (!resolvedAddress || /^-?\d+\.\d+,\s*-?\d+\.\d+$/.test(resolvedAddress)) {
+      resolvedAddress = `${nearest.name}, ${nearest.state}`;
+      city = nearest.name;
+    }
     const next: SavedLocation = {
       lat,
       lng,
       address: resolvedAddress,
+      city: city || nearest.name || zone.name,
       zoneId: zone.id,
       zoneName: zone.name,
     };

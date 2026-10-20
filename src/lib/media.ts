@@ -27,10 +27,7 @@ function hostSwapped(url: string) {
 }
 
 function allBases(imageBaseUrl?: string | null) {
-  return unique([
-    ...IMAGE_BASE_FALLBACKS,
-    imageBaseUrl?.replace(/\/$/, "") || "",
-  ]);
+  return unique([...IMAGE_BASE_FALLBACKS, imageBaseUrl?.replace(/\/$/, "") || ""]);
 }
 
 function join(base: string, folder: string, raw: string) {
@@ -113,14 +110,38 @@ export function serviceImageSources(
     thumbnail_full_url?: string | null;
     cover_image?: string | null;
     thumbnail?: string | null;
+    thumbnails?: string | null;
+    images?: string[] | string | null;
   },
   imageBaseUrl?: string | null,
 ) {
+  const gallery: string[] = [];
+  const collect = (value?: string[] | string | null) => {
+    if (Array.isArray(value)) {
+      gallery.push(...value);
+      return;
+    }
+    const raw = (value ?? "").trim();
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      if (Array.isArray(parsed)) {
+        gallery.push(...parsed.map(String));
+        return;
+      }
+    } catch {
+      /* legacy pipe/comma-separated gallery */
+    }
+    gallery.push(...raw.split(/[|,]/));
+  };
+  collect(service.images);
+  collect(service.thumbnails);
   return unique([
     ...mediaFallbacks(service.cover_image_full_url, "service", imageBaseUrl),
     ...mediaFallbacks(service.thumbnail_full_url, "service", imageBaseUrl),
     ...mediaFallbacks(service.cover_image, "service", imageBaseUrl),
     ...mediaFallbacks(service.thumbnail, "service", imageBaseUrl),
+    ...gallery.flatMap((image) => mediaFallbacks(image, "service", imageBaseUrl)),
   ]);
 }
 

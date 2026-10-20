@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Heart, Home, PlusCircle, CalendarDays, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/lib/stores/cart";
+import { PostAdChooser } from "@/components/post-ad/post-ad-chooser";
 
 const ITEMS = [
   { href: "/", label: "Home", icon: Home },
@@ -26,24 +27,37 @@ export function BottomNav() {
           const Icon = item.icon;
           return (
             <li key={item.href}>
-              <Link
-                href={item.href}
-                className={cn(
-                  "flex flex-col items-center gap-0.5 py-2 text-[11px]",
-                  active ? "text-brand" : "text-muted",
-                  item.accent && "text-navy",
-                )}
-              >
-                <span className="relative">
-                  <Icon className={cn("h-5 w-5", item.accent && "text-post-dark")} />
-                  {item.href === "/cart" && cartCount > 0 ? (
-                    <span className="absolute -right-2 -top-1 rounded-full bg-brand px-1 text-[9px] text-white">
-                      {cartCount}
-                    </span>
-                  ) : null}
-                </span>
-                {item.label}
-              </Link>
+              {item.accent ? (
+                <PostAdChooser
+                  className={cn(
+                    "flex w-full flex-col items-center gap-0.5 py-2 text-[11px]",
+                    "text-navy",
+                  )}
+                >
+                  <span className="relative">
+                    <Icon className="h-5 w-5 text-post-dark" />
+                  </span>
+                  {item.label}
+                </PostAdChooser>
+              ) : (
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "flex flex-col items-center gap-0.5 py-2 text-[11px]",
+                    active ? "text-brand" : "text-muted",
+                  )}
+                >
+                  <span className="relative">
+                    <Icon className="h-5 w-5" />
+                    {item.href === "/cart" && cartCount > 0 ? (
+                      <span className="absolute -right-2 -top-1 rounded-full bg-brand px-1 text-[9px] text-white">
+                        {cartCount}
+                      </span>
+                    ) : null}
+                  </span>
+                  {item.label}
+                </Link>
+              )}
             </li>
           );
         })}

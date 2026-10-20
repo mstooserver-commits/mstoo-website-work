@@ -78,6 +78,7 @@ export interface AppConfig {
   wallet_status?: number;
   loyalty_point_status?: number;
   referral_earning_status?: number;
+  referral_value_per_currency_unit?: number | string;
   direct_provider_booking?: number;
   bidding_status?: number;
   phone_verification?: number;
@@ -132,10 +133,13 @@ export interface PlacePrediction {
   place_id?: string;
   description?: string;
   structured_formatting?: { main_text?: string; secondary_text?: string };
+  lat?: number;
+  lng?: number;
 }
 
 export interface SavedLocation {
   address: string;
+  city?: string;
   lat: number;
   lng: number;
   zoneId: string;
@@ -153,6 +157,10 @@ export interface UserInfo {
   wallet_balance?: number | string;
   loyalty_point?: number | string;
   refer_code?: string;
+  ref_code?: string;
+  document?: string;
+  document_type?: string;
+  document_status?: "pending" | "approved" | "rejected" | "resubmission_required" | string;
   is_phone_verified?: number;
   is_email_verified?: number;
   provider?: unknown;
@@ -213,13 +221,14 @@ export interface Service {
   cover_image_full_url?: string;
   thumbnail_full_url?: string;
   thumbnails?: string;
+  images?: string[] | string;
   display_price?: string;
   currency_symbol?: string;
   price_unit?: string;
+  rent_duration?: string | null;
   min_price?: number | string;
   max_price?: number | string;
   price?: number | string;
-  rent_duration?: string | null;
   category_id?: string;
   sub_category_id?: string;
   tax?: number;
@@ -231,6 +240,7 @@ export interface Service {
   latitude?: string | number | null;
   longitude?: string | number | null;
   contact_info?: string | null;
+  condition?: string | null;
   distance?: number;
   created_at?: string;
   updated_at?: string;
@@ -278,14 +288,19 @@ export interface Provider {
 export interface Address {
   id?: string | number;
   address_type?: string;
+  address_label?: string;
   contact_person_name?: string;
   contact_person_number?: string;
   address?: string;
   latitude?: string | number;
   longitude?: string | number;
+  lat?: string | number;
+  lon?: string | number;
   zone_id?: string;
   city?: string;
   zip_code?: string;
+  country?: string;
+  street?: string;
   is_default?: number;
 }
 

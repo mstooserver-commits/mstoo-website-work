@@ -18,6 +18,8 @@ const PROTECTED_PREFIXES = [
   "/provider/bank",
   "/provider/withdraw",
   "/provider/reports",
+  "/bulk-post",
+  "/refer-earn",
 ];
 
 export function middleware(request: NextRequest) {
@@ -59,6 +61,8 @@ export const config = {
     "/provider/bank/:path*",
     "/provider/withdraw/:path*",
     "/provider/reports/:path*",
+    "/bulk-post/:path*",
+    "/refer-earn/:path*",
     "/checkout",
     "/bookings",
     "/wallet",
@@ -76,5 +80,7 @@ export const config = {
     "/provider/bank",
     "/provider/withdraw",
     "/provider/reports",
+    "/bulk-post",
+    "/refer-earn",
   ],
 };

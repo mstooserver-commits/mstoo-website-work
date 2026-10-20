@@ -2,7 +2,9 @@ import { resolveRazorpayPublicKey } from "@/lib/razorpay-env";
 
 export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME ?? "MSTOO";
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://preprod.mstoo.co.in";
+  process.env.NEXT_PUBLIC_API_URL ??
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  "https://preprod.mstoo.co.in";
 export const CURRENCY = process.env.NEXT_PUBLIC_CURRENCY ?? "INR";
 export const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 export const RAZORPAY_PUBLIC_KEY = resolveRazorpayPublicKey(APP_URL);
@@ -30,7 +32,7 @@ export const DEFAULT_LOCATION = {
 };
 
 export const IMAGE_BASE_FALLBACKS = [
-  "https://api.mstoo.co.in/storage/app/public",
+  "https://preprod.mstoo.co.in/storage/app/public",
   "https://preprod.mstoo.co.in/storage/app/public",
 ];
 
@@ -51,6 +53,7 @@ export const ENDPOINTS = {
   removeAccount: "/api/v1/customer/remove-account",
   updateZone: "/api/v1/customer/update-zone",
   fcmToken: "/api/v1/customer/update/fcm-token",
+  contact: "/api/v1/customer/add_contact",
 
   sendOtp: "/api/v1/user/verification/send-otp",
   verifyOtp: "/api/v1/user/verification/verify-otp",

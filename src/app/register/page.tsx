@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -100,6 +100,11 @@ export default function RegisterPage() {
   });
   const password = form.watch("password") || "";
   const strength = useMemo(() => passwordStrength(password), [password]);
+
+  useEffect(() => {
+    const referral = new URLSearchParams(window.location.search).get("referral");
+    if (referral) form.setValue("referral_code", referral);
+  }, [form]);
 
   if (config && !isFlagOn(config.customer_self_registration)) {
     return (

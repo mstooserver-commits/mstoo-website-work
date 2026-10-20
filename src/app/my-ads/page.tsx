@@ -7,6 +7,7 @@ import { serviceImageSources } from "@/lib/media";
 import { SafeImage } from "@/components/ui/safe-image";
 import { EmptyState } from "@/components/ui/states";
 import type { Service } from "@/types";
+import { PostAdChooser } from "@/components/post-ad/post-ad-chooser";
 
 export default function MyAdsPage() {
   const q = useQuery({
@@ -19,9 +20,7 @@ export default function MyAdsPage() {
     <div className="container-page py-8">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">My ads</h1>
-        <Link href="/post-ad" className="btn-post">
-          Post ad
-        </Link>
+        <PostAdChooser className="btn-post">Post ad</PostAdChooser>
       </div>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {items.map((s) => (

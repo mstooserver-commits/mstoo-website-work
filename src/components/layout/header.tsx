@@ -8,6 +8,7 @@ import { useAuthStore } from "@/lib/stores/auth";
 import { useCartStore } from "@/lib/stores/cart";
 import { useLocationStore } from "@/lib/stores/location";
 import { cn } from "@/lib/utils";
+import { PostAdChooser } from "@/components/post-ad/post-ad-chooser";
 
 const NAV = [
   { href: "/", label: "Home" },
@@ -48,7 +49,9 @@ export function Header() {
           <MapPin className="h-4 w-4 shrink-0 text-brand" />
           <span className="truncate text-xs">
             <span className="block font-semibold text-ink">Deliver to</span>
-            <span className="text-muted">{location?.address || "Set location"}</span>
+            <span className="text-muted">
+              {location?.city || location?.address || "Set location"}
+            </span>
           </span>
         </button>
 
@@ -63,19 +66,26 @@ export function Header() {
         </form>
 
         <nav className="ml-auto hidden items-center gap-1 lg:flex">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium text-ink hover:bg-brand-soft hover:text-brand",
-                item.href === "/post-ad" &&
-                  "bg-brand px-4 text-white shadow-fab hover:bg-brand-dark hover:text-white",
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {NAV.map((item) =>
+            item.href === "/post-ad" ? (
+              <PostAdChooser
+                key={item.href}
+                className="rounded-md bg-brand px-4 py-2 text-sm font-medium text-white shadow-fab hover:bg-brand-dark"
+              >
+                {item.label}
+              </PostAdChooser>
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "rounded-md px-3 py-2 text-sm font-medium text-ink hover:bg-brand-soft hover:text-brand",
+                )}
+              >
+                {item.label}
+              </Link>
+            ),
+          )}
         </nav>
 
         <div className="ml-auto flex items-center gap-1 md:ml-0">
@@ -137,18 +147,43 @@ export function Header() {
             />
           </form>
           <div className="flex flex-col">
-            {NAV.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="py-2 text-sm font-medium"
-                onClick={() => setOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {NAV.map((item) =>
+              item.href === "/post-ad" ? (
+                <PostAdChooser
+                  key={item.href}
+                  className="py-2 text-left text-sm font-medium"
+                  onOpen={() => setOpen(false)}
+                >
+                  {item.label}
+                </PostAdChooser>
+              ) : (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="py-2 text-sm font-medium"
+                  onClick={() => setOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ),
+            )}
             <Link href="/bookings" className="py-2 text-sm" onClick={() => setOpen(false)}>
               Bookings
+            </Link>
+            <Link href="/bulk-post" className="py-2 text-sm" onClick={() => setOpen(false)}>
+              Bulk add posts
+            </Link>
+            <Link href="/pro-member" className="py-2 text-sm" onClick={() => setOpen(false)}>
+              MSTOO Pro
+            </Link>
+            <Link href="/refer-earn" className="py-2 text-sm" onClick={() => setOpen(false)}>
+              Refer &amp; earn
+            </Link>
+            <Link href="/support" className="py-2 text-sm" onClick={() => setOpen(false)}>
+              Help &amp; support
+            </Link>
+            <Link href="/chat" className="py-2 text-sm" onClick={() => setOpen(false)}>
+              Live chat
             </Link>
             <p className="pt-2 text-xs text-muted">
               {isLoggedIn

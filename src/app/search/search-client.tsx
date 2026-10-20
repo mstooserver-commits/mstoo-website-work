@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Grid2X2, MapPin, Search } from "lucide-react";
+import { Filter, Grid2X2, MapPin, Search, X } from "lucide-react";
 import { catalogApi } from "@/lib/api";
 import { useLocationStore } from "@/lib/stores/location";
 import { ServiceGrid } from "@/components/service/service-card";
@@ -29,11 +29,40 @@ export default function SearchClient() {
   const [max, setMax] = useState("");
   const [query, setQuery] = useState(q);
   const [category, setCategory] = useState(categoryId);
+  const [subcategory, setSubcategory] = useState("");
+  const [rentDuration, setRentDuration] = useState("any");
+  const [condition, setCondition] = useState("any");
+  const [minRating, setMinRating] = useState("0");
+  const [availableOnly, setAvailableOnly] = useState(false);
+  const [featuredOnly, setFeaturedOnly] = useState(false);
+  const [sortBy, setSortBy] = useState(sort || "newest");
+  const [showFilters, setShowFilters] = useState(false);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
     setPage(1);
-  }, [q, categoryId, sort, min, max, location?.zoneId]);
+  }, [
+    q,
+    categoryId,
+    sort,
+    min,
+    max,
+    subcategory,
+    rentDuration,
+    condition,
+    minRating,
+    availableOnly,
+    featuredOnly,
+    sortBy,
+    location?.zoneId,
+  ]);
+
+  useEffect(() => {
+    setQuery(q);
+    setCategory(categoryId);
+    setSubcategory("");
+    setSortBy(sort || "newest");
+  }, [q, categoryId, sort]);
 
   const categories = useQuery({
     queryKey: ["categories", location?.zoneId],
@@ -41,14 +70,46 @@ export default function SearchClient() {
     queryFn: () => catalogApi.categories(),
   });
 
+  const subcategories = useQuery({
+    queryKey: ["subcategories", category],
+    enabled: Boolean(category),
+    queryFn: () => catalogApi.children(category),
+  });
+
   const result = useQuery({
-    queryKey: ["search", location?.zoneId, q, categoryId, sort, min, max, page],
+    queryKey: [
+      "search",
+      location?.zoneId,
+      q,
+      categoryId,
+      subcategory,
+      sort,
+      min,
+      max,
+      rentDuration,
+      condition,
+      minRating,
+      sortBy,
+      page,
+    ],
     enabled: Boolean(location?.zoneId),
     placeholderData: (previousData) => previousData,
     queryFn: async () => {
       if (sort === "popular") return catalogApi.popular(page);
       if (sort === "trending") return catalogApi.trending(page);
       if (sort === "recommended") return catalogApi.recommended(page);
+      if (subcategory) {
+        return catalogApi.filter(subcategory, {
+          offset: page,
+          minprice: min || 0,
+          maxprice: max || 100000,
+          ...(q ? { search: q, name: q } : {}),
+          ...(rentDuration !== "any" ? { rent_duration: rentDuration } : {}),
+          ...(condition !== "any" ? { condition } : {}),
+          ...(Number(minRating) > 0 ? { min_rating: minRating } : {}),
+          sort_by: sortBy,
+        });
+      }
       if (q) {
         return catalogApi.search({
           string: q,
@@ -69,7 +130,48 @@ export default function SearchClient() {
     },
   });
 
-  const items = list(result.data);
+  const items = list(result.data)
+    .filter((item) => {
+      const price = Number(item.min_price ?? item.price ?? 0);
+      return (!min || price >= Number(min)) && (!max || price <= Number(max));
+    })
+    .filter(
+      (item) =>
+        rentDuration === "any" ||
+        String(item.rent_duration || item.price_unit || "")
+          .toLowerCase()
+          .includes(rentDuration),
+    )
+    .filter(
+      (item) =>
+        condition === "any" ||
+        [item.condition, item.name, item.short_description, item.description]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase()
+          .replace(/_/g, " ")
+          .includes(condition.replace(/_/g, " ").toLowerCase()),
+    )
+    .filter((item) => Number(item.avg_rating || 0) >= Number(minRating))
+    .filter(
+      (item) =>
+        !availableOnly ||
+        Number(item.is_active ?? 1) === 1 ||
+        ["yes", "available", "1"].includes(String(item.availability || "").toLowerCase()),
+    )
+    .filter(
+      (item) =>
+        !featuredOnly ||
+        ["yes", "1", "true"].includes(String(item.is_featured || "").toLowerCase()),
+    )
+    .sort((a, b) => {
+      const price = (item: Service) => Number(item.min_price ?? item.price ?? 0);
+      const date = (item: Service) => new Date(item.created_at || 0).getTime();
+      if (sortBy === "price_asc") return price(a) - price(b);
+      if (sortBy === "price_desc") return price(b) - price(a);
+      if (sortBy === "oldest") return date(a) - date(b);
+      return date(b) - date(a);
+    });
   const total = result.data?.total;
   const pageSize = Number(result.data?.per_page) || (q || categoryId ? 30 : 10);
   const totalPages = result.data?.last_page || (total ? Math.ceil(total / pageSize) : 1);
@@ -115,7 +217,10 @@ export default function SearchClient() {
             <select
               className="min-w-0 flex-1 bg-transparent py-3 text-sm text-muted outline-none"
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e) => {
+                setCategory(e.target.value);
+                setSubcategory("");
+              }}
             >
               <option value="">All categories</option>
               {categoryItems.map((item: Category) => (
@@ -139,24 +244,130 @@ export default function SearchClient() {
           </button>
         </form>
       </div>
-      <div className="mt-5 grid grid-cols-2 gap-3 sm:max-w-sm">
-        <input
-          className="input"
-          inputMode="numeric"
-          aria-label="Minimum price"
-          placeholder="Min ₹"
-          value={min}
-          onChange={(e) => setMin(e.target.value)}
-        />
-        <input
-          className="input"
-          inputMode="numeric"
-          aria-label="Maximum price"
-          placeholder="Max ₹"
-          value={max}
-          onChange={(e) => setMax(e.target.value)}
-        />
+      <div className="mt-5 flex items-center justify-between gap-3">
+        <button
+          type="button"
+          className="btn-secondary gap-2"
+          onClick={() => setShowFilters((value) => !value)}
+        >
+          <Filter className="h-4 w-4" /> Filters
+        </button>
+        <select
+          className="input max-w-52"
+          aria-label="Sort ads"
+          value={sortBy}
+          onChange={(event) => setSortBy(event.target.value)}
+        >
+          <option value="newest">Newest</option>
+          <option value="oldest">Oldest</option>
+          <option value="price_asc">Price: Low to high</option>
+          <option value="price_desc">Price: High to low</option>
+        </select>
       </div>
+      {showFilters ? (
+        <div className="mt-4 rounded-2xl border border-line bg-white p-4 shadow-card">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <select
+              className="input"
+              aria-label="Subcategory"
+              value={subcategory}
+              onChange={(event) => setSubcategory(event.target.value)}
+              disabled={!category}
+            >
+              <option value="">All subcategories</option>
+              {(subcategories.data?.data || []).map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+            <input
+              className="input"
+              inputMode="numeric"
+              aria-label="Minimum price"
+              placeholder="Min ₹"
+              value={min}
+              onChange={(e) => setMin(e.target.value)}
+            />
+            <input
+              className="input"
+              inputMode="numeric"
+              aria-label="Maximum price"
+              placeholder="Max ₹"
+              value={max}
+              onChange={(e) => setMax(e.target.value)}
+            />
+            <select
+              className="input"
+              value={rentDuration}
+              onChange={(event) => setRentDuration(event.target.value)}
+              aria-label="Rent duration"
+            >
+              <option value="any">Any duration</option>
+              <option value="hour">Hourly</option>
+              <option value="day">Daily</option>
+              <option value="week">Weekly</option>
+              <option value="month">Monthly</option>
+            </select>
+            <select
+              className="input"
+              value={condition}
+              onChange={(event) => setCondition(event.target.value)}
+              aria-label="Condition"
+            >
+              <option value="any">Any condition</option>
+              <option value="new">New</option>
+              <option value="like_new">Like new</option>
+              <option value="good">Good</option>
+              <option value="fair">Fair</option>
+            </select>
+            <select
+              className="input"
+              value={minRating}
+              onChange={(event) => setMinRating(event.target.value)}
+              aria-label="Minimum rating"
+            >
+              <option value="0">Any rating</option>
+              <option value="3">3+ stars</option>
+              <option value="4">4+ stars</option>
+              <option value="4.5">4.5+ stars</option>
+            </select>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={availableOnly}
+                onChange={(event) => setAvailableOnly(event.target.checked)}
+              />{" "}
+              Available only
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={featuredOnly}
+                onChange={(event) => setFeaturedOnly(event.target.checked)}
+              />{" "}
+              Featured only
+            </label>
+          </div>
+          <button
+            type="button"
+            className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand"
+            onClick={() => {
+              setMin("");
+              setMax("");
+              setSubcategory("");
+              setRentDuration("any");
+              setCondition("any");
+              setMinRating("0");
+              setAvailableOnly(false);
+              setFeaturedOnly(false);
+              setSortBy("newest");
+            }}
+          >
+            <X className="h-4 w-4" /> Reset filters
+          </button>
+        </div>
+      ) : null}
       <div className="mt-6">
         {result.isLoading ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

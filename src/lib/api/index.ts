@@ -187,3 +187,7 @@ export const customPostApi = {
 export const notificationApi = {
   list: (offset = 1) => apiGet(ENDPOINTS.notification, { offset, limit: 20 }),
 };
+
+export const supportApi = {
+  send: (message: string) => apiPost(ENDPOINTS.contact, { message }),
+};

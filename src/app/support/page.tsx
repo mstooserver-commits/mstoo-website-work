@@ -1,5 +1,6 @@
 import { pageMeta } from "@/lib/seo";
 import Link from "next/link";
+import { SupportForm } from "@/components/support/support-form";
 
 export const metadata = pageMeta({
   title: "Help & Support",
@@ -46,18 +47,26 @@ export default function SupportPage() {
     <div className="container-page max-w-3xl py-10">
       <h1 className="text-3xl font-bold">Help &amp; Support</h1>
       <p className="mt-3 text-[15px] leading-7 text-ink/90">
-        Need help with a booking, posting an ad, a payment, or your account? The MSTOO team is available 9:00–18:00 IST,
-        Monday to Saturday (excluding public holidays).
+        Need help with a booking, posting an ad, a payment, or your account? The MSTOO team is
+        available 9:00–18:00 IST, Monday to Saturday (excluding public holidays).
       </p>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {CONTACTS.map((item) => (
-          <a key={item.label} href={item.href} className="card p-4 text-sm hover:border-brand/40" target={item.href.startsWith("http") ? "_blank" : undefined} rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}>
+          <a
+            key={item.label}
+            href={item.href}
+            className="card p-4 text-sm hover:border-brand/40"
+            target={item.href.startsWith("http") ? "_blank" : undefined}
+            rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
+          >
             <p className="text-xs font-semibold uppercase tracking-wide text-muted">{item.label}</p>
             <p className="mt-1 font-medium text-brand">{item.value}</p>
           </a>
         ))}
       </div>
+
+      <SupportForm />
 
       <h2 className="mt-10 text-xl font-bold">Common questions</h2>
       <div className="cms-content mt-4">
