@@ -120,6 +120,7 @@ export interface CmsPages {
   privacy_policy?: CmsPage;
   refund_policy?: CmsPage;
   cancellation_policy?: CmsPage;
+  whatsapp_business_policy?: CmsPage;
   return_policy?: CmsPage;
 }
 

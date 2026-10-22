@@ -24,6 +24,12 @@ const MAP: Record<string, { key: keyof CmsPages; title: string; path: string; le
       path: "/cancellation",
       legal: "cancellation",
     },
+    whatsappBusiness: {
+      key: "whatsapp_business_policy",
+      title: "WhatsApp Business Messaging Policy",
+      path: "/whatsapp-business-policy",
+      legal: "whatsappBusiness",
+    },
   };
 
 const GENERIC_PRIVACY_STUB = /inform visitors regarding our policies with the collection/i;

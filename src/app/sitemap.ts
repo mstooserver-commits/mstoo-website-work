@@ -13,6 +13,7 @@ const STATIC_PATHS = [
   "/privacy",
   "/refund",
   "/cancellation",
+  "/whatsapp-business-policy",
   "/support",
   "/blogs",
 ];

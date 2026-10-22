@@ -59,6 +59,7 @@ const COMPANY = [
   { href: "/privacy", label: "Privacy" },
   { href: "/refund", label: "Refund" },
   { href: "/cancellation", label: "Cancellation" },
+  { href: "/whatsapp-business-policy", label: "WhatsApp Messaging Policy" },
   { href: "/support", label: "Help & Support" },
   { href: "/chat", label: "Live Chat" },
   { href: "/pro-member", label: "MSTOO Pro" },

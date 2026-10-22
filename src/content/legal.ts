@@ -205,6 +205,50 @@ export const LEGAL_HTML = {
 <p>WhatsApp: <a href="https://wa.me/916280116008" target="_blank" rel="noopener noreferrer">+91 62801 16008</a>.</p>
 <p>Last updated: ${LEGAL_UPDATED}.</p>
 `,
+  whatsappBusiness: `
+<p>This WhatsApp Business Messaging Policy explains how MSTOO uses WhatsApp to communicate with customers, listing providers and other users of the MSTOO platform. It supplements our <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms and Conditions</a>.</p>
+
+<h2>1. Who we are</h2>
+<p>MSTOO is an Indian rental marketplace that helps users rent, lease and hire items and services. Our official WhatsApp contact number is <a href="https://wa.me/916280116008" target="_blank" rel="noopener noreferrer">+91 62801 16008</a>.</p>
+
+<h2>2. Consent to receive messages</h2>
+<p>We send WhatsApp messages only when you have provided your phone number and requested, consented to, or reasonably expect the communication as part of your interaction with MSTOO. You can provide consent through the MSTOO website or app, a booking or support request, or by starting a WhatsApp conversation with us.</p>
+<p>Consent to receive WhatsApp messages is not a condition of purchasing or using a paid MSTOO service. Do not submit another person's phone number without their permission.</p>
+
+<h2>3. Messages we may send</h2>
+<ul>
+<li><strong>Authentication:</strong> one-time passwords and account-verification messages.</li>
+<li><strong>Transactional:</strong> booking requests, confirmations, status changes, cancellations, payments, refunds and service reminders.</li>
+<li><strong>Customer support:</strong> replies to questions, complaints, disputes and account-support requests.</li>
+<li><strong>Marketing:</strong> offers, recommendations or product updates only where you have opted in and applicable law permits them.</li>
+</ul>
+<p>We do not send deceptive, unlawful or unsolicited bulk messages, and we do not ask you to share passwords, OTPs, card PINs or other sensitive authentication information in a WhatsApp chat.</p>
+
+<h2>4. Opting out</h2>
+<p>You can stop promotional WhatsApp messages at any time by replying <strong>STOP</strong> or asking us to opt you out. We will honour the request as soon as reasonably possible. You may still receive essential non-promotional messages needed to complete an active booking, respond to your support request, protect your account or comply with law.</p>
+<p>You can also block the MSTOO number using WhatsApp's controls or email <a href="mailto:support@mstoo.co.in">support@mstoo.co.in</a>.</p>
+
+<h2>5. Acceptable use</h2>
+<p>WhatsApp conversations with MSTOO must relate to genuine MSTOO accounts, listings, bookings or support. Users must not use our WhatsApp channel to:</p>
+<ul>
+<li>send spam, threats, harassment, hateful content, malware or illegal material;</li>
+<li>impersonate another person or business, commit fraud or misrepresent a listing;</li>
+<li>offer illegal, stolen, counterfeit, hazardous, adult, weapons-related or otherwise prohibited goods or services; or</li>
+<li>violate the <a href="https://www.whatsapp.com/legal/business-policy/" target="_blank" rel="noopener noreferrer">WhatsApp Business Messaging Policy</a>, the <a href="https://www.whatsapp.com/legal/commerce-policy/" target="_blank" rel="noopener noreferrer">WhatsApp Commerce Policy</a>, MSTOO's Terms or applicable law.</li>
+</ul>
+<p>We may refuse assistance, report abusive activity, remove related listings or restrict an MSTOO account when these rules are violated.</p>
+
+<h2>6. Privacy and data handling</h2>
+<p>When you communicate with us through WhatsApp, we may process your phone number, profile name, message content, attachments and related support or booking information. We use this information to provide the requested service, maintain security, resolve disputes and improve support, as described in our <a href="/privacy">Privacy Policy</a>.</p>
+<p>WhatsApp and Meta also process information under their own terms and privacy policies. Please do not send unnecessary identity documents, financial credentials or other sensitive information through chat.</p>
+
+<h2>7. Response times and emergencies</h2>
+<p>WhatsApp is a customer-service channel and is not monitored continuously. It must not be used for emergencies. For urgent danger, contact the appropriate local emergency service.</p>
+
+<h2>8. Changes and contact</h2>
+<p>We may update this policy when our messaging practices, services or legal obligations change. Questions, complaints and privacy requests can be sent to <a href="mailto:support@mstoo.co.in">support@mstoo.co.in</a> or to our official WhatsApp number above.</p>
+<p>Last updated: 22 October 2026.</p>
+`,
 } as const;
 
 export type LegalSlug = keyof typeof LEGAL_HTML;
