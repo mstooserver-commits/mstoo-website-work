@@ -710,7 +710,9 @@ export function PostAdForm() {
     if (payment?.payment_id) form.append("payment_id", payment.payment_id);
     if (payment?.signature) form.append("signature", payment.signature);
     appendCategoryFields(form, values);
-    photos.forEach((file) => form.append("images[]", file, file.name));
+    // The first photo is already sent as cover_image. Only additional photos
+    // belong in the gallery, otherwise the cover appears twice.
+    photos.slice(1).forEach((file) => form.append("images[]", file, file.name));
     return form;
   };
 

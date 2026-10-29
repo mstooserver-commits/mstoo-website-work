@@ -84,11 +84,8 @@ export default function BulkPostPage() {
       const conditions = asStringList(fieldData.condition);
       const sizes = asStringList(fieldData.cloth_size);
       patch(draft.id, {
-        subcategories:
-          subcategories.status === "fulfilled" ? asNamedList(subcategories.value) : [],
-        categoryName: normalizeCatName(
-          String(fieldData.category_name || selected?.name || ""),
-        ),
+        subcategories: subcategories.status === "fulfilled" ? asNamedList(subcategories.value) : [],
+        categoryName: normalizeCatName(String(fieldData.category_name || selected?.name || "")),
         condition: conditions[0] || "good",
         clothSize: sizes[0] || "M",
       });
@@ -176,7 +173,8 @@ export default function BulkPostPage() {
           form.append("delivery_pickup", JSON.stringify(["pickup"]));
         }
         form.append("cover_image", await fileToBase64(photos[0]));
-        photos.forEach((photo) => form.append("images[]", photo, photo.name));
+        // cover_image contains photos[0]; send only additional gallery photos.
+        photos.slice(1).forEach((photo) => form.append("images[]", photo, photo.name));
         await providerApi.addService(form);
         posted += 1;
         patch(draft.id, { status: "success", error: undefined });
@@ -222,8 +220,12 @@ export default function BulkPostPage() {
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <h2 className="font-bold">Ad {index + 1}</h2>
-                {draft.status === "posting" ? <LoaderCircle className="h-4 w-4 animate-spin text-brand" /> : null}
-                {draft.status === "success" ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : null}
+                {draft.status === "posting" ? (
+                  <LoaderCircle className="h-4 w-4 animate-spin text-brand" />
+                ) : null}
+                {draft.status === "success" ? (
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                ) : null}
                 {draft.status === "failed" ? <XCircle className="h-4 w-4 text-danger" /> : null}
               </div>
               {drafts.length > 1 ? (
@@ -271,7 +273,9 @@ export default function BulkPostPage() {
                 placeholder="Ad title"
                 value={draft.title}
                 disabled={busy || draft.status === "success"}
-                onChange={(event) => patch(draft.id, { title: event.target.value, status: "pending" })}
+                onChange={(event) =>
+                  patch(draft.id, { title: event.target.value, status: "pending" })
+                }
               />
               <input
                 className="input"
@@ -279,7 +283,9 @@ export default function BulkPostPage() {
                 placeholder="Price ₹"
                 value={draft.price}
                 disabled={busy || draft.status === "success"}
-                onChange={(event) => patch(draft.id, { price: event.target.value, status: "pending" })}
+                onChange={(event) =>
+                  patch(draft.id, { price: event.target.value, status: "pending" })
+                }
               />
               <select
                 className="input"
@@ -313,7 +319,9 @@ export default function BulkPostPage() {
                 placeholder="Description"
                 value={draft.description}
                 disabled={busy || draft.status === "success"}
-                onChange={(event) => patch(draft.id, { description: event.target.value, status: "pending" })}
+                onChange={(event) =>
+                  patch(draft.id, { description: event.target.value, status: "pending" })
+                }
               />
             </div>
             <p className="mt-2 text-xs text-muted">

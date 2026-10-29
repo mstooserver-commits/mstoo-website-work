@@ -142,6 +142,7 @@ export const ENDPOINTS = {
 
   addService: "/api/v1/provider/add_service",
   featuredAdOrder: "/api/v1/provider/featured-ad/razorpay-order",
+  featuredAdActivate: "/api/v1/provider/featured-ad/",
   getAllCat: "/api/v1/getallcat",
   getAllSubCat: "/api/v1/getallsubcatbyid/",
   getFieldsById: "/api/v1/getfieldsbyid/",

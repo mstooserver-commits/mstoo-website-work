@@ -150,6 +150,14 @@ export const providerApi = {
     apiPost<
       LaravelResponse<{ key?: string; order_id?: string; amount?: number; currency?: string }>
     >(ENDPOINTS.featuredAdOrder, { sub_category_id }),
+  existingFeaturedAdOrder: (service_id: string) =>
+    apiPost<
+      LaravelResponse<{ key?: string; order_id?: string; amount?: number; currency?: string }>
+    >(ENDPOINTS.featuredAdOrder, { service_id }),
+  activateFeaturedAd: (
+    serviceId: string,
+    payment: { payment_id?: string; order_id?: string; signature?: string },
+  ) => apiPost(`${ENDPOINTS.featuredAdActivate}${serviceId}/activate`, payment),
   postCategories: () => apiGet<Array<{ id?: string; name?: string }>>(ENDPOINTS.getAllCat),
   postSubcategories: (id: string) =>
     apiGet<Array<{ id?: string; name?: string }>>(`${ENDPOINTS.getAllSubCat}${id}`),
